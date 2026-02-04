@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camions BL — Processus PMO Pré-Gate 0</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a365d;
+            --primary-light: #2c5282;
+            --primary-dark: #0f2744;
+            --accent: #c6a052;
+            --accent-light: #d4af61;
+            --accent-glow: rgba(198, 160, 82, 0.25);
+            --success: #16a34a;
+            --success-bg: rgba(22, 163, 74, 0.08);
+            --warning: #ca8a04;
+            --warning-bg: rgba(202, 138, 4, 0.08);
+            --error: #dc2626;
+            --error-bg: rgba(220, 38, 38, 0.06);
+            --info: #2563eb;
+            --bg: #ffffff;
+            --bg-card: #f8fafc;
+            --bg-card-hover: #f1f5f9;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --text-dim: #94a3b8;
+            --border: #e2e8f0;
+            --gradient-gold: linear-gradient(135deg, #c6a052 0%, #d4af61 50%, #c6a052 100%);
+            --go: #16a34a;
+            --attente: #dc2626;
+            --project-color: #2563eb;
+            --improvement-color: #16a34a;
+            --it-color: #7c3aed;
+            --ops-color: #ea580c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+
+        /* ─── HEADER ─── */
+        .app-header {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+            padding: 0.75rem 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .app-header-left { display: flex; align-items: center; gap: 0.75rem; }
+        .app-logo-icon { width: 40px; height: 40px; background: var(--gradient-gold); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .app-logo-text { font-family: 'Fraunces', serif; font-size: 1.35rem; font-weight: 700; }
+        .app-logo-sub { font-size: 0.75rem; color: var(--text-dim); }
+        .app-header-right { display: flex; align-items: center; gap: 0.75rem; }
+        .header-badge { background: var(--bg-card); padding: 0.35rem 0.75rem; border-radius: 8px; font-size: 0.8rem; color: var(--text-muted); border: 1px solid var(--border); }
+        .header-btn { padding: 0.4rem 0.85rem; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; font-size: 0.8rem; transition: all 0.2s; }
+        .header-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ─── NAV TABS ─── */
+        .nav-tabs {
+            position: fixed; top: 61px; left: 0; right: 0; z-index: 999;
+            background: var(--bg-card); border-bottom: 1px solid var(--border);
+            display: flex; padding: 0 2rem; overflow-x: auto;
+        }
+        .nav-tab {
+            padding: 0.85rem 0.9rem; border: none; cursor: pointer; font-family: inherit;
+            font-size: 0.82rem; font-weight: 500; color: var(--text-dim);
+            background: transparent; border-bottom: 3px solid transparent;
+            transition: all 0.2s; white-space: nowrap;
+        }
+        .nav-tab:hover { color: var(--text-muted); }
+        .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg-card-hover); }
+        .nav-tab-icon { margin-right: 0.35rem; }
+
+        /* ─── MAIN CONTENT ─── */
+        .app-content { padding: 7.5rem 2rem 2rem; max-width: 1200px; margin: 0 auto; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        /* ─── CARDS ─── */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .card-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .card-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem; }
+
+        /* ─── FORM ELEMENTS (CharterPro style) ─── */
+        .form-section { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1.25rem; }
+        .form-section-title { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .form-row.single { grid-template-columns: 1fr; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-label { display: block; font-size: 0.85rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; }
+        .form-label .req { color: var(--error); }
+        .form-control {
+            width: 100%; padding: 0.7rem 0.9rem; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 8px; color: var(--text); font-family: inherit; font-size: 0.9rem; transition: all 0.2s;
+        }
+        .form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+        textarea.form-control { min-height: 100px; resize: vertical; }
+        select.form-control { cursor: pointer; }
+        .form-hint { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.3rem; }
+
+        /* Dynamic Lists */
+        .dynamic-list { margin-top: 0.75rem; }
+        .dynamic-item { display: flex; gap: 0.6rem; margin-bottom: 0.6rem; align-items: flex-start; }
+        .dynamic-item input, .dynamic-item textarea { flex: 1; }
+        .btn-remove { width: 34px; height: 34px; border-radius: 8px; background: var(--error-bg); color: var(--error); border: 1px solid rgba(229,62,62,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem; transition: all 0.2s; }
+        .btn-remove:hover { background: var(--error); color: white; }
+        .btn-add { display: flex; align-items: center; gap: 0.4rem; padding: 0.45rem 0.9rem; background: transparent; border: 1px dashed var(--border); border-radius: 8px; color: var(--text-muted); cursor: pointer; font-family: inherit; font-size: 0.82rem; transition: all 0.2s; }
+        .btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ─── BUTTONS ─── */
+        .btn { padding: 0.65rem 1.25rem; border-radius: 8px; font-family: inherit; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; gap: 0.4rem; }
+        .btn-gold { background: var(--gradient-gold); color: var(--primary-dark); }
+        .btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
+        .btn-secondary { background: var(--bg-card); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--text-dim); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { opacity: 0.9; }
+
+        /* ─── RISK / MILESTONE TABLES (CharterPro style) ─── */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 0.65rem; text-align: left; border-bottom: 1px solid var(--border); }
+        .data-table th { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .data-table input, .data-table select { width: 100%; padding: 0.45rem; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: inherit; font-size: 0.88rem; }
+        .data-table input:focus, .data-table select:focus { outline: none; border-color: var(--accent); }
+
+        /* ─── METRICS GRID (CharterPro style) ─── */
+        .metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
+        .metric-card { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); border-radius: 12px; padding: 1.15rem; text-align: center; color: #ffffff; }
+        .metric-value { font-size: 1.6rem; font-weight: 700; color: var(--accent-light); }
+        .metric-label { font-size: 0.78rem; color: rgba(255,255,255,0.85); margin-top: 0.2rem; }
+
+        /* ─── CHARTER SIDEBAR (White theme) ─── */
+        .charter-layout { display: flex; gap: 0; min-height: calc(100vh - 120px); margin: -1.5rem -2rem; }
+        .charter-sidebar { width: 260px; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 1.25rem 0; flex-shrink: 0; position: sticky; top: 0; height: fit-content; }
+        .sidebar-title { padding: 0 1.25rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 0.85rem; }
+        .step-item { display: flex; align-items: center; gap: 0.85rem; padding: 0.85rem 1.25rem; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+        .step-item:hover { background: #f1f5f9; }
+        .step-item.active { background: #eef2ff; border-left-color: var(--accent); }
+        .step-item.completed .step-number { background: var(--success); color: white; }
+        .step-number { width: 30px; height: 30px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.82rem; flex-shrink: 0; }
+        .step-item.active .step-number { background: var(--accent); color: var(--primary-dark); }
+        .step-info h4 { font-size: 0.9rem; font-weight: 500; margin-bottom: 0.1rem; color: #1e293b; }
+        .step-info p { font-size: 0.75rem; color: #94a3b8; }
+        .charter-main { flex: 1; padding: 2rem; max-width: 860px; background: #ffffff; }
+        .charter-step { display: none; }
+        .charter-step.active { display: block; }
+        .step-header { margin-bottom: 1.5rem; }
+        .step-header h2 { font-family: 'Fraunces', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 0.35rem; color: #1e293b; }
+        .step-header p { color: #64748b; font-size: 0.9rem; }
+        .step-nav { display: flex; justify-content: space-between; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid #e2e8f0; }
+
+        /* Charter form overrides (white) */
+        .charter-main .form-section { background: #f8fafc; border: 1px solid #e2e8f0; }
+        .charter-main .form-section-title { color: #1e293b; }
+        .charter-main .form-label { color: #475569; }
+        .charter-main .form-control { background: #ffffff; border-color: #cbd5e1; color: #1e293b; }
+        .charter-main .form-control:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(198,160,82,0.15); }
+        .charter-main .form-control::placeholder { color: #94a3b8; }
+        .charter-main .form-hint { color: #94a3b8; }
+        .charter-main .btn-add { border-color: #cbd5e1; color: #64748b; }
+        .charter-main .btn-add:hover { border-color: var(--accent); color: #b8860b; }
+        .charter-main .btn-remove { background: #fef2f2; color: #ef4444; border-color: #fecaca; }
+        .charter-main .btn-remove:hover { background: #ef4444; color: white; }
+        .charter-main .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .charter-main .btn-secondary:hover { background: #e2e8f0; }
+        .charter-main .btn-gold { background: var(--gradient-gold); color: var(--primary-dark); border: none; }
+        .charter-main .btn-success { background: var(--success); color: white; border: none; }
+        .charter-main .data-table th { color: #475569; border-bottom: 2px solid #e2e8f0; background: transparent; font-size: 0.78rem; }
+        .charter-main .data-table td { border-bottom: 1px solid #f1f5f9; }
+        .charter-main .data-table input, .charter-main .data-table select { background: #fff; border-color: #cbd5e1; color: #1e293b; }
+        .charter-main .data-table input:focus, .charter-main .data-table select:focus { border-color: var(--accent); }
+
+        /* ─── PREVIEW PANEL (CharterPro style) ─── */
+        .preview-panel { background: white; color: #1a1a2e; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .preview-header { text-align: center; padding: 1.5rem; border-bottom: 3px solid var(--primary); }
+        .preview-title { font-family: 'Fraunces', serif; font-size: 1.35rem; color: var(--primary); margin-bottom: 0.2rem; }
+        .preview-subtitle { color: #666; font-size: 0.9rem; }
+        .preview-meta { display: flex; justify-content: center; gap: 1.5rem; margin-top: 0.75rem; font-size: 0.82rem; color: #666; }
+        .preview-body { padding: 1.5rem; }
+        .preview-section { margin-bottom: 1.25rem; }
+        .preview-section-title { font-family: 'Fraunces', serif; font-size: 0.95rem; color: var(--primary); border-bottom: 2px solid var(--accent); padding-bottom: 0.4rem; margin-bottom: 0.6rem; }
+        .preview-section p { line-height: 1.7; margin-bottom: 0.4rem; color: #333; font-size: 0.9rem; }
+        .preview-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin: 0.75rem 0; }
+        .preview-metric { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%); color: white; padding: 0.85rem; border-radius: 8px; text-align: center; }
+        .preview-metric-value { font-size: 1.3rem; font-weight: 700; color: var(--accent-light); }
+        .preview-metric-label { font-size: 0.72rem; opacity: 0.9; }
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.6rem 0; }
+        .preview-table th, .preview-table td { padding: 0.5rem; text-align: left; border: 1px solid #e0e0e0; }
+        .preview-table th { background: var(--primary); color: white; font-weight: 600; }
+        .preview-table tr:nth-child(even) { background: #f9f9f9; }
+        .preview-list { margin-left: 1.5rem; color: #333; font-size: 0.9rem; }
+        .preview-list li { margin-bottom: 0.3rem; }
+
+        /* ─── WORKFLOW STEPS ─── */
+        .workflow-step { background: var(--bg-card); border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid var(--border); display: flex; align-items: center; gap: 1rem; cursor: pointer; transition: all 0.25s; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .workflow-step:hover { border-color: var(--accent); transform: translateX(4px); }
+        .workflow-step-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; color: white; }
+        .workflow-step-label { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        .workflow-step h3 { font-size: 1rem; font-weight: 600; margin: 0.1rem 0; }
+        .workflow-step p { font-size: 0.82rem; color: var(--text-muted); margin: 0; }
+        .workflow-step-action { padding: 0.4rem 0.85rem; border-radius: 8px; font-size: 0.78rem; font-weight: 500; white-space: nowrap; }
+        .workflow-connector { display: flex; justify-content: center; padding: 0.15rem 0; }
+        .workflow-connector-line { width: 2px; height: 16px; background: var(--border); }
+
+        /* ─── WORKFLOW ROW WITH SIDE INPUT ─── */
+        .workflow-row { display: flex; align-items: center; gap: 0; }
+        .workflow-row > div:first-child { flex: 1; min-width: 0; }
+        .workflow-arrow-left { color: var(--primary-light); font-size: 1rem; padding: 0 0.5rem; opacity: 0.5; flex-shrink: 0; }
+        .workflow-side-input {
+            width: 240px; flex-shrink: 0;
+            background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px;
+            padding: 0.85rem 1rem; position: relative; transition: all 0.2s;
+        }
+        .workflow-side-input[onclick]:hover { border-color: var(--success); box-shadow: 0 2px 8px rgba(22,163,74,0.15); transform: translateX(2px); }
+        .side-input-freq { font-size: 0.68rem; font-style: italic; color: var(--success); font-weight: 500; margin-bottom: 0.3rem; }
+        .side-input-title { font-size: 0.88rem; font-weight: 700; color: #1e293b; line-height: 1.3; margin-bottom: 0.25rem; }
+        .side-input-desc { font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; }
+        .workflow-step-input { border-style: dashed; background: #faf5ff; }
+
+        /* ─── SCORING TABLE ─── */
+        .scoring-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .scoring-table th { padding: 0.7rem 0.5rem; background: var(--primary); color: white; font-weight: 600; text-align: center; font-size: 0.78rem; }
+        .scoring-table th:first-child, .scoring-table th:nth-child(2), .scoring-table th:nth-child(3) { text-align: left; }
+        .scoring-table td { padding: 0.5rem; border-bottom: 1px solid var(--border); }
+        .scoring-table tbody tr:hover { background: var(--bg-card-hover); }
+        .scoring-input { width: 42px; padding: 0.4rem 0.15rem; text-align: center; border-radius: 6px; border: 1px solid var(--border); font-size: 0.9rem; font-weight: 600; background: var(--bg); color: var(--text); }
+        .scoring-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+        .score-high { background: var(--success-bg) !important; color: var(--success) !important; border-color: var(--success) !important; }
+        .score-mid { background: var(--warning-bg) !important; color: var(--warning) !important; border-color: var(--warning) !important; }
+        .score-low { background: var(--error-bg) !important; color: var(--error) !important; border-color: var(--error) !important; }
+
+        /* ─── CAPACITY BAR ─── */
+        .cap-bar-bg { height: 16px; background: #e2e8f0; border-radius: 5px; overflow: hidden; position: relative; }
+        .cap-bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+        .cap-bar-fill.go { background: linear-gradient(90deg, #48bb78, #276749); }
+        .cap-bar-fill.attente { background: linear-gradient(90deg, #fc8181, #c53030); }
+        .cap-max-line { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--accent); z-index: 2; }
+
+        /* ─── STATUS BADGES ─── */
+        .badge { padding: 0.15rem 0.6rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; }
+        .badge-go { background: var(--success-bg); color: var(--success); border: 1px solid rgba(56,161,105,0.3); }
+        .badge-attente { background: var(--error-bg); color: var(--error); border: 1px solid rgba(229,62,62,0.3); }
+        .badge-scored { background: var(--success-bg); color: var(--success); }
+        .badge-unscored { background: var(--warning-bg); color: var(--warning); }
+
+        /* ─── BRANCH BADGES ─── */
+        .branch-card { padding: 0.85rem; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+
+        /* ─── TRIAGE CHAT ─── */
+        .chat-area { background: #fafbfc; border-radius: 12px 12px 0 0; border: 1px solid var(--border); border-bottom: none; height: 340px; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+        .chat-area::-webkit-scrollbar { width: 5px; }
+        .chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        .chat-msg { max-width: 85%; padding: 0.6rem 0.9rem; border-radius: 10px; font-size: 0.88rem; line-height: 1.5; white-space: pre-line; }
+        .chat-msg.bot { background: #eef2f7; }
+        .chat-msg.bot.hl { background: rgba(66,153,225,0.1); border: 1px solid rgba(66,153,225,0.3); }
+        .chat-msg.user { background: var(--primary-light); color: #ffffff; margin-left: auto; }
+        .chat-input { background: var(--bg-card); border: 1px solid var(--border); border-top: 1px solid var(--border); border-radius: 0 0 12px 12px; padding: 1rem; }
+
+        /* ─── GATE 0 TABLES ─── */
+        .gate-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .gate-table th { padding: 0.65rem 0.5rem; color: white; font-weight: 600; text-align: center; }
+        .gate-table th:nth-child(2) { text-align: left; }
+        .gate-table td { padding: 0.6rem 0.5rem; border-bottom: 1px solid var(--border); text-align: center; }
+        .gate-table td:nth-child(2) { text-align: left; font-weight: 500; }
+        .gate-table-go th { background: var(--success); }
+        .gate-table-attente th { background: var(--error); }
+
+        /* ─── NOTIFICATIONS ─── */
+        .notif { position: fixed; top: 12px; right: 12px; z-index: 2000; padding: 0.65rem 1.15rem; border-radius: 10px; color: white; font-size: 0.85rem; font-weight: 500; box-shadow: 0 8px 30px rgba(0,0,0,0.3); animation: fadeIn 0.3s ease-out; }
+        .notif.ok { background: var(--success); }
+        .notif.warn { background: var(--warning); }
+
+        /* ─── MODAL OVERLAY ─── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; align-items: flex-start; justify-content: center; z-index: 1500; padding: 1.5rem; overflow-y: auto; }
+        .modal-box { background: #ffffff; border-radius: 16px; width: 100%; max-width: 1100px; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; animation: fadeIn 0.3s ease-out; box-shadow: 0 25px 60px rgba(0,0,0,0.3); }
+
+        /* ─── CHARTER MODAL HEADER ─── */
+        .charter-modal-header { padding: 0.75rem 1.25rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-radius: 16px 16px 0 0; }
+        .charter-back-btn { background: none; border: 1px solid #cbd5e1; border-radius: 8px; padding: 0.35rem 0.75rem; font-size: 0.82rem; font-weight: 500; color: #475569; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .charter-back-btn:hover { background: #f1f5f9; border-color: #94a3b8; color: #1e293b; }
+        .charter-logo-icon { width: 32px; height: 32px; background: var(--gradient-gold); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        .charter-modal-title { font-family: 'Fraunces', serif; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+        .charter-save-indicator { font-size: 0.78rem; color: #94a3b8; }
+        .charter-btn-close { background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; padding: 0.4rem 0.85rem; font-size: 0.82rem; font-weight: 500; color: #475569; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .charter-btn-close:hover { background: #e2e8f0; color: #1e293b; }
+        .charter-btn-save { background: var(--gradient-gold); border: none; border-radius: 8px; padding: 0.4rem 0.85rem; font-size: 0.82rem; font-weight: 600; color: var(--primary-dark); cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .charter-btn-save:hover { transform: translateY(-1px); box-shadow: 0 4px 12px var(--accent-glow); }
+
+        /* ─── ANIMATIONS ─── */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ─── PRINT ─── */
+        @media print {
+            .app-header, .nav-tabs, .no-print, .btn, button { display: none !important; }
+            .app-content { padding: 0 !important; }
+            body { background: white !important; color: black !important; }
+            .preview-panel { box-shadow: none; border-radius: 0; }
+            .preview-section { page-break-inside: avoid; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            @page { size: letter; margin: 0.75in; }
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 900px) {
+            .charter-sidebar { display: none; }
+            .form-row { grid-template-columns: 1fr; }
+            .metrics-grid, .preview-metrics { grid-template-columns: 1fr; }
+            .workflow-row { flex-direction: column; gap: 0.5rem; }
+            .workflow-arrow-left { transform: rotate(90deg); }
+            .workflow-side-input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="app-header">
+    <div class="app-header-left">
+        <div class="app-logo-icon">🏗️</div>
+        <div>
+            <div class="app-logo-text">Processus PMO</div>
+            <div class="app-logo-sub">Camions BL — Pré-Gate 0</div>
+        </div>
+    </div>
+    <div class="app-header-right">
+        <span class="header-badge" id="headerStats">—</span>
+        <button class="header-btn" onclick="exportData()">💾 Exporter</button>
+        <label class="header-btn" style="cursor:pointer">📂 Importer<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+    </div>
+</header>
+
+<!-- ═══ NAV ═══ -->
+<nav class="nav-tabs no-print" id="navTabs">
+    <button class="nav-tab active" data-tab="workflow"><span class="nav-tab-icon">🔄</span>Processus</button>
+    <button class="nav-tab" data-tab="triage"><span class="nav-tab-icon">🎯</span>Triage</button>
+    <button class="nav-tab" data-tab="portfolio"><span class="nav-tab-icon">📊</span>Portefeuille</button>
+    <button class="nav-tab" data-tab="scoring"><span class="nav-tab-icon">⭐</span>Scoring</button>
+    <button class="nav-tab" data-tab="people"><span class="nav-tab-icon">👥</span>Ressources</button>
+    <button class="nav-tab" data-tab="assign"><span class="nav-tab-icon">📌</span>Affectation</button>
+    <button class="nav-tab" data-tab="recommend"><span class="nav-tab-icon">🚦</span>Recommandation</button>
+    <button class="nav-tab" data-tab="analysis"><span class="nav-tab-icon">🔍</span>Analyse</button>
+    <button class="nav-tab" data-tab="gate0"><span class="nav-tab-icon">📄</span>Gate 0</button>
+</nav>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="app-content">
+
+<!-- ─── WORKFLOW PAGE ─── -->
+<div class="page active" id="page-workflow">
+    <div style="text-align:center;margin-bottom:1.5rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.5rem;font-weight:700">Processus PMO — Pré-Gate 0</h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-top:0.3rem">De la capture d'idées à l'approbation exécutive</p>
+    </div>
+    <div style="max-width:660px;margin:0 auto" id="workflowSteps"></div>
+    <div class="card" style="margin-top:1.5rem">
+        <div class="card-title">Les 4 branches du triage</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem" id="branchCards"></div>
+    </div>
+    <div style="margin-top:1rem;background:var(--bg-card-hover);border-radius:12px;padding:1rem;border:1px dashed var(--border);text-align:center">
+        <p style="margin:0;font-size:0.85rem;color:var(--text-dim)">↓ Après Gate 0 → <b style="color:var(--text-muted)">Teams Planner</b> (Chantal) → Gate 1 → Exécution → Gate 2 → Bénéfices → Gate 3</p>
+    </div>
+</div>
+
+<!-- ─── TRIAGE PAGE ─── -->
+<div class="page" id="page-triage">
+    <h2 style="font-family:'Fraunces',serif;font-size:1.25rem;margin-bottom:1rem">🎯 Triage des idées & opportunités</h2>
+    <div style="max-width:660px;margin:0 auto">
+        <div class="chat-area" id="chatArea"></div>
+        <div class="chat-input" id="chatInput"></div>
+        <div style="margin-top:0.6rem;display:flex;gap:0.4rem;justify-content:center" id="tierIndicator"></div>
+    </div>
+</div>
+
+<!-- ─── PORTFOLIO PAGE ─── -->
+<div class="page" id="page-portfolio">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+        <h2 style="font-family:'Fraunces',serif;font-size:1.25rem">📊 Portefeuille d'initiatives</h2>
+        <button class="btn btn-gold" onclick="goTab('triage')">+ Nouvelle initiative</button>
+    </div>
+    <div id="portfolioList"></div>
+</div>
+
+<!-- ─── SCORING PAGE ─── -->
+<div class="page" id="page-scoring">
+    <h2 style="font-family:'Fraunces',serif;font-size:1.25rem;margin-bottom:0.35rem">⭐ Scoring & Priorisation</h2>
+    <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:1.25rem">6 critères pondérés × 10 points — le score pondéré détermine la priorité</p>
+    <div style="overflow-x:auto" id="scoringTableWrap"></div>
+    <div class="card" style="margin-top:1rem" id="criteriaLegend"></div>
+</div>
+
+<!-- ─── PEOPLE PAGE: Named Resources + Availability ─── -->
+<div class="page" id="page-people">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.25rem">👥 Ressources de l'organisation</h2>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem">Disponibilité en heures/semaine pour les projets — validée par les gestionnaires</p>
+        </div>
+        <button class="btn btn-gold" onclick="addPerson()">+ Ajouter une ressource</button>
+    </div>
+    <div id="peopleTableWrap"></div>
+    <div class="card" style="margin-top:1rem;background:#f0fdf4;border-color:#bbf7d0" id="peopleSummary"></div>
+</div>
+
+<!-- ─── ASSIGNMENT PAGE: Assign People to Projects ─── -->
+<div class="page" id="page-assign">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.25rem">📌 Affectation des ressources</h2>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem">Assignez les personnes aux projets en heures/semaine</p>
+        </div>
+    </div>
+    <div style="overflow-x:auto" id="assignTableWrap"></div>
+</div>
+
+<!-- ─── RECOMMENDATION PAGE: GO / GOULOT Results ─── -->
+<div class="page" id="page-recommend">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.25rem">🚦 Recommandation capacité</h2>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem">Quels projets peut-on réaliser avec la capacité actuelle?</p>
+        </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;margin-bottom:1.25rem" id="recommendKPIs"></div>
+    <div id="recommendContent"></div>
+</div>
+
+<!-- ─── ANALYSIS PAGE: Detailed Capacity Drill-down ─── -->
+<div class="page" id="page-analysis">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.25rem">🔍 Analyse de capacité détaillée</h2>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem">Charge individuelle par ressource — identifiez les goulots</p>
+        </div>
+    </div>
+    <div id="analysisContent"></div>
+</div>
+
+<!-- ─── GATE 0 PAGE ─── -->
+<div class="page" id="page-gate0">
+    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+        <div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.25rem">🚦 Recommandation — Gate 0</h2>
+            <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.2rem">Pour approbation par Samuel / Comité exécutif</p>
+        </div>
+        <div style="display:flex;gap:0.5rem">
+            <button class="btn btn-gold" onclick="copyGate0Report()">📋 Copier</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimer</button>
+        </div>
+    </div>
+    <div id="gate0Content"></div>
+</div>
+
+</div><!-- /app-content -->
+
+<!-- ═══ CHARTER MODAL ═══ -->
+<div class="modal-overlay" id="charterModal" style="display:none">
+    <div class="modal-box">
+        <div class="charter-modal-header">
+            <div style="display:flex;align-items:center;gap:0.6rem">
+                <button class="charter-back-btn" onclick="closeCharter()" title="Retour au portefeuille">← Retour</button>
+                <div class="charter-logo-icon">📋</div>
+                <span class="charter-modal-title" id="charterModalTitle">Charte de projet</span>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+                <span class="charter-save-indicator" id="charterSaveStatus">●</span>
+                <button class="charter-btn-close" onclick="closeCharter()">✕ Fermer</button>
+                <button class="charter-btn-save" onclick="saveCharter()">💾 Sauvegarder</button>
+            </div>
+        </div>
+        <div style="display:flex;flex:1;overflow:hidden;max-height:calc(92vh - 56px)">
+            <!-- Sidebar -->
+            <aside class="charter-sidebar" id="charterSidebar"></aside>
+            <!-- Main -->
+            <main class="charter-main" style="overflow-y:auto" id="charterMain"></main>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ NOTIFICATION ═══ -->
+<div id="notifEl" class="notif ok" style="display:none"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA & STATE
+// ═══════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'camionsbl_pmo_v2';
+const BRANCHES = {
+    project: { icon:'📋', label:'PROJET', color:'var(--project-color)', bg:'rgba(66,153,225,0.1)' },
+    continuous_improvement: { icon:'🔄', label:'AMÉLIORATION CONTINUE', color:'var(--improvement-color)', bg:'rgba(56,161,105,0.1)' },
+    it_ticket: { icon:'🎫', label:'BILLET TI', color:'var(--it-color)', bg:'rgba(128,90,213,0.1)' },
+    operations: { icon:'⚙️', label:'OPÉRATIONS', color:'var(--ops-color)', bg:'rgba(221,107,32,0.1)' },
+};
+const CRITERIA = [
+    { id:'strategic_fit', label:'Fit stratégique', short:'Strat.', hint:'Alignement Roches & BHAG' },
+    { id:'productivity', label:'Avantages productivité', short:'Prod.', hint:"Gains d'efficacité" },
+    { id:'market', label:'Attrait marché', short:'Marché', hint:'Impact compétitivité/clients' },
+    { id:'core_competency', label:'Compétence clé', short:'Core', hint:'Alignement core business' },
+    { id:'feasibility', label:'Faisabilité technique', short:'Faisab.', hint:'Complexité & risques' },
+    { id:'mission', label:'Contribution mission', short:'Mission', hint:"Contribution à la mission" },
+];
+const DEFAULT_WEIGHTS = { strategic_fit:25, productivity:20, market:15, core_competency:15, feasibility:15, mission:10 };
+
+const FUNCTIONS = [
+    { id:'direction', label:'Direction générale', dept:'Direction', icon:'👔' },
+    { id:'gestionnaires', label:'Gestionnaires', dept:'Direction', icon:'📋' },
+    { id:'ventes_neufs', label:'Ventes — Camions neufs', dept:'Ventes', icon:'🚛' },
+    { id:'ventes_usages', label:'Ventes — Camions usagés', dept:'Ventes', icon:'🔄' },
+    { id:'service_client', label:'Service à la clientèle', dept:'Service', icon:'📞' },
+    { id:'mecaniciens', label:'Mécaniciens', dept:'Service', icon:'🔧' },
+    { id:'conseillers_tech', label:'Conseillers techniques', dept:'Service', icon:'⚙️' },
+    { id:'pieces', label:'Pièces & Inventaire', dept:'Pièces', icon:'📦' },
+    { id:'finance', label:'Finance & Comptabilité', dept:'Admin', icon:'💰' },
+    { id:'ti', label:'TI / Informatique', dept:'Admin', icon:'💻' },
+    { id:'rh', label:'RH & Administration', dept:'Admin', icon:'🏢' },
+    { id:'marketing', label:'Marketing', dept:'Admin', icon:'📣' },
+];
+const DEFAULT_AVAILABILITY = {};
+const DEFAULT_PROJECT_RESOURCES = {};
+
+// ── Named Resources Model ──
+const DEFAULT_PEOPLE = [
+    { id:'r1', name:'Chantal', funcId:'gestionnaires', availHrsWeek:5 },
+    { id:'r2', name:'Gilbert', funcId:'ventes_neufs', availHrsWeek:8 },
+    { id:'r3', name:'Lemieux', funcId:'service_client', availHrsWeek:6 },
+    { id:'r4', name:'Robichaud', funcId:'ti', availHrsWeek:10 },
+    { id:'r5', name:'Tremblay', funcId:'mecaniciens', availHrsWeek:5 },
+    { id:'r6', name:'Coopers', funcId:'direction', availHrsWeek:4 },
+    { id:'r7', name:'Smith', funcId:'ti', availHrsWeek:12 },
+    { id:'r8', name:'Ouellette', funcId:'conseillers_tech', availHrsWeek:6 },
+    { id:'r9', name:'Samuel L.', funcId:'direction', availHrsWeek:3 },
+    { id:'r10', name:'Dupont', funcId:'finance', availHrsWeek:4 },
+    { id:'r11', name:'Martin', funcId:'pieces', availHrsWeek:5 },
+    { id:'r12', name:'Bergeron', funcId:'marketing', availHrsWeek:6 },
+    { id:'r13', name:'Lavoie', funcId:'rh', availHrsWeek:4 },
+    { id:'r14', name:'Gagnon', funcId:'mecaniciens', availHrsWeek:4 },
+    { id:'r15', name:'Roy', funcId:'ventes_usages', availHrsWeek:6 },
+];
+const DEFAULT_ASSIGNMENTS = {
+    p1: { r4:6, r2:4, r3:3, r1:2, r12:2 },
+    p2: { r3:5, r1:4, r5:3, r13:2 },
+    p3: { r7:8, r2:3, r3:2, r1:2 },
+    p4: { r5:5, r8:4, r11:2, r1:2 },
+    p5: { r6:4, r1:5, r3:3, r10:2 },
+    p6: { r7:6, r14:3, r8:2, r1:2 },
+};
+const SOURCES = [
+    { v:'reunion_hebdo', l:'Réunion hebdomadaire', icon:'📅' },
+    { v:'reunion_mensuelle', l:'Réunion mensuelle', icon:'📊' },
+    { v:'terrain', l:'Terrain / Opérations', icon:'🔧' },
+    { v:'direction', l:'Direction / C.Dir', icon:'👔' },
+    { v:'client', l:'Client / Externe', icon:'🤝' },
+    { v:'autre', l:'Autre source', icon:'💡' },
+];
+const TIER1 = [
+    { id:'multifonctionnel', q:'Cette initiative requiert-elle des ressources de plusieurs départements?', h:'Ex: IT + Ventes + Marketing pour un CRM' },
+    { id:'nouvelle_capacite', q:"Crée-t-elle une capacité qui n'existe pas aujourd'hui?", h:'Nouveau système, processus ou offre' },
+    { id:'ressources_externes', q:'Nécessite-t-elle des ressources externes?', h:'Fournisseurs, consultants, budget externe' },
+];
+const TIER2 = [
+    { id:'bug_ti', q:"S'agit-il d'un bogue, problème technique ou demande TI?", h:'Erreur système, accès réseau, équipement' },
+    { id:'processus_existant', q:'Peut-on améliorer un processus existant sans changer de système?', h:'Optimisation, standardisation' },
+    { id:'equipe_existante', q:"L'équipe actuelle peut-elle le faire dans son travail régulier?", h:'Pas de ressources supplémentaires' },
+];
+const TIER3 = [
+    { id:'budget_dedie', q:'Nécessite-t-elle un budget dédié hors opérations courantes?', h:'Budget projet à approuver' },
+    { id:'duree_90jours', q:'Dépasse-t-elle 90 jours (un cycle de Roche)?', h:'Traverse plusieurs trimestres' },
+    { id:'risque_strategique', q:"L'échec impacterait-il les objectifs stratégiques?", h:'Lié aux Roches ou BHAG' },
+];
+
+const CHARTER_STEPS = [
+    { n:1, title:'Informations de base', sub:'Nom, type, dates', icon:'📋' },
+    { n:2, title:'Sommaire & Objectifs', sub:'Description, buts', icon:'🎯' },
+    { n:3, title:'Portée', sub:'Inclus, exclu, livrables', icon:'📐' },
+    { n:4, title:'Parties prenantes', sub:'Sponsor, équipe, rôles', icon:'👥' },
+    { n:5, title:'Risques & Contraintes', sub:'Évaluation des risques', icon:'⚠️' },
+    { n:6, title:'Échéancier & Budget', sub:'Jalons, finances', icon:'💰' },
+    { n:7, title:'Aperçu & Export', sub:'Révision, PDF', icon:'📄' },
+];
+
+const DEFAULT_PROJECTS = [
+    { id:'p1', name:'Implantation CRM', chef:'Gilbert', source:'direction', branch:'project',
+      charter:{ sponsor:'Samuel Lamoureux', type:'Software Development', priority:'High', overview:'Centraliser la gestion clients avec un CRM moderne intégré aux opérations de vente et service.', objectives:['Réduire le temps de traitement des leads de 40%','Centraliser 100% des données clients'], inScope:'Ventes + Service + Marketing', budget:'150 000$', benefits:'200 000$', duration:'1.5', benefitPeriod:'3', startDate:'2026-03-01', endDate:'2027-08-31',
+        risks:[{risk:'Résistance au changement',impact:'High',mitigation:'Plan de formation dédié'},{risk:'Intégration DMS complexe',impact:'Medium',mitigation:'POC préalable'}],
+        milestones:[{phase:'Analyse des besoins',duration:'2 mois',date:'Mai 2026'},{phase:'Configuration',duration:'4 mois',date:'Sep 2026'},{phase:'Formation & Go-live',duration:'3 mois',date:'Déc 2026'}],
+        deliverables:['CRM configuré et intégré','Formation utilisateurs','Documentation processus'], stakeholders:[{name:'Samuel Lamoureux',role:'Sponsor'},{name:'Équipe ventes',role:'Utilisateurs'}] },
+      scores:{strategic_fit:9,productivity:9,market:10,core_competency:10,feasibility:9,mission:9}, resources:20, triageDate:'2026-01-15' },
+    { id:'p2', name:'Programme Excellence Service', chef:'Lemieux', source:'reunion_mensuelle', branch:'project',
+      charter:{ sponsor:'Philippe Lamoureux', type:'Business Transformation', priority:'High', overview:'Standardiser la qualité du service à travers les 5 succursales.', objectives:['Atteindre certification Elite Support','Score satisfaction client > 4.5/5'], inScope:'Service + Formation', budget:'80 000$', benefits:'120 000$', duration:'1', benefitPeriod:'3',
+        risks:[{risk:'Variabilité entre succursales',impact:'High',mitigation:'Standards uniformes'}], milestones:[{phase:'Diagnostic',duration:'2 mois',date:'Avr 2026'},{phase:'Déploiement',duration:'4 mois',date:'Août 2026'}] },
+      scores:{strategic_fit:10,productivity:10,market:7,core_competency:7,feasibility:7,mission:7}, resources:20, triageDate:'2026-01-15' },
+    { id:'p3', name:'Portail client en ligne', chef:'Robichaud', source:'client', branch:'project',
+      charter:{ sponsor:'Samuel Lamoureux', type:'Software Development', priority:'Medium', overview:'Self-service pour suivi de flottes et demandes de service.', objectives:['Réduire appels clients de 30%','Suivi en temps réel des véhicules en service'], inScope:'TI + Ventes + Service', budget:'120 000$', benefits:'160 000$', duration:'1.5', benefitPeriod:'3',
+        risks:[{risk:'Adoption par les clients',impact:'Medium',mitigation:'UX testing avec clients pilotes'}], milestones:[{phase:'Design UX',duration:'3 mois',date:'Juin 2026'},{phase:'Développement',duration:'6 mois',date:'Déc 2026'}] },
+      scores:{strategic_fit:8,productivity:7,market:7,core_competency:8,feasibility:9,mission:9}, resources:15, triageDate:'2026-01-20' },
+    { id:'p4', name:'Lean Service Optimization', chef:'Tremblay', source:'terrain', branch:'project',
+      charter:{ sponsor:'Marc Ouellette', type:'Business Transformation', priority:'Medium', overview:"Réduire temps d'attente baies service par approche Lean.", objectives:["Réduire temps d'attente de 25%",'Augmenter throughput de 15%'], inScope:'Service + Pièces', budget:'45 000$', benefits:'80 000$', duration:'0.5', benefitPeriod:'3',
+        risks:[{risk:'Perturbation des opérations durant le changement',impact:'Medium',mitigation:'Déploiement par succursale'}], milestones:[{phase:'Analyse Lean',duration:'1 mois',date:'Mars 2026'},{phase:'Implémentation',duration:'3 mois',date:'Juin 2026'}] },
+      scores:{strategic_fit:7,productivity:7,market:9,core_competency:9,feasibility:8,mission:5}, resources:12, triageDate:'2026-01-22' },
+    { id:'p5', name:'Expansion Victoriaville', chef:'Coopers', source:'direction', branch:'project',
+      charter:{ sponsor:'Samuel Lamoureux', type:'Construction', priority:'High', overview:'Croissance de 10K à 26K pi² pour capacité service accrue.', objectives:['Tripler la capacité de service','Ajouter 4 baies de service'], inScope:'Direction + Service + Admin', budget:'500 000$', benefits:'300 000$', duration:'2', benefitPeriod:'5',
+        risks:[{risk:'Dépassement de coûts construction',impact:'High',mitigation:'Contrat prix fixe avec contingence 15%'}], milestones:[{phase:'Plans & permis',duration:'4 mois',date:'Juin 2026'},{phase:'Construction',duration:'8 mois',date:'Fév 2027'},{phase:'Aménagement',duration:'2 mois',date:'Avr 2027'}] },
+      scores:{strategic_fit:7,productivity:7,market:6,core_competency:8,feasibility:8,mission:6}, resources:20, triageDate:'2026-01-10' },
+    { id:'p6', name:'App mobile techniciens', chef:'Smith', source:'terrain', branch:'project',
+      charter:{ sponsor:'Marc Ouellette', type:'Software Development', priority:'Medium', overview:'Bons de travail digitaux pour les techniciens sur le terrain.', objectives:['Éliminer 100% des formulaires papier','Réduire temps admin de 30%'], inScope:'TI + Service', budget:'95 000$', benefits:'60 000$', duration:'1', benefitPeriod:'3',
+        risks:[{risk:'Adoption par techniciens terrain',impact:'Medium',mitigation:'Champions par succursale + formation hands-on'}], milestones:[{phase:'Prototypage',duration:'2 mois',date:'Avr 2026'},{phase:'Développement',duration:'4 mois',date:'Août 2026'},{phase:'Pilote',duration:'2 mois',date:'Oct 2026'}] },
+      scores:{strategic_fit:8,productivity:6,market:6,core_competency:7,feasibility:5,mission:5}, resources:20, triageDate:'2026-01-25' },
+];
+
+let STATE = { projects: [], maxCapacity: 70, weights: {...DEFAULT_WEIGHTS}, people: JSON.parse(JSON.stringify(DEFAULT_PEOPLE)), assignments: JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS)) };
+let currentCharterProject = null;
+let charterStep = 1;
+
+// Triage state
+let triageState = { step:'desc', desc:'', src:'', ans:{}, tier:1, qi:0, result:null, msgs:[{t:'bot',txt:'👋 Bienvenue! Décrivez l\'idée ou l\'opportunité à évaluer.',hl:true}] };
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+function init() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) { 
+            const d = JSON.parse(raw); 
+            STATE.projects = d.projects || DEFAULT_PROJECTS; 
+            STATE.maxCapacity = d.maxCapacity || 70; 
+            STATE.weights = d.weights || {...DEFAULT_WEIGHTS}; 
+            STATE.people = d.people || JSON.parse(JSON.stringify(DEFAULT_PEOPLE));
+            STATE.assignments = d.assignments || JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS));
+        }
+        else { STATE.projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS)); }
+    } catch(e) { STATE.projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS)); }
+    setupTabs();
+    renderAll();
+}
+
+function saveState() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch(e) {}
+}
+
+function getTotalAvailableHrs() {
+    return STATE.people.reduce((s,p) => s + (p.availHrsWeek||0), 0);
+}
+function getPersonAvailHrs(pid) {
+    const p = STATE.people.find(x=>x.id===pid);
+    return p ? (p.availHrsWeek||0) : 0;
+}
+function getPersonAssignedHrs(pid) {
+    let total = 0;
+    Object.values(STATE.assignments).forEach(a => { total += (a[pid]||0); });
+    return total;
+}
+function getProjectTotalHrs(projId) {
+    const a = STATE.assignments[projId] || {};
+    return Object.values(a).reduce((s,v) => s + (v||0), 0);
+}
+function funcLabel(fid) {
+    const f = FUNCTIONS.find(x=>x.id===fid);
+    return f ? f.label : fid;
+}
+function funcIcon(fid) {
+    const f = FUNCTIONS.find(x=>x.id===fid);
+    return f ? f.icon : '👤';
+}
+
+function notify(msg, t='ok') {
+    const el = document.getElementById('notifEl');
+    el.textContent = msg; el.className = 'notif ' + t; el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 2500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════════
+function setupTabs() {
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.onclick = () => goTab(btn.dataset.tab);
+    });
+}
+
+function goTab(tabId) {
+    document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + tabId));
+    renderAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+const gid = () => 'p' + Date.now().toString(36) + Math.random().toString(36).substr(2,4);
+const weightedScore = s => {
+    if(!s) return 0;
+    const w = STATE.weights;
+    let total = 0;
+    CRITERIA.forEach(c => { total += (s[c.id]||0) * (w[c.id]||0) / 100; });
+    return total;
+};
+const sum = s => s ? Object.values(s).reduce((a,b) => a + (b||0), 0) : 0;
+const pct = s => ((weightedScore(s)/10)*100).toFixed(1);
+const esc = t => { if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; };
+const fmt = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+function sorted() { return [...STATE.projects].filter(p=>p.branch==='project'&&p.scores).sort((a,b)=>weightedScore(b.scores)-weightedScore(a.scores)); }
+function nonProj() { return STATE.projects.filter(p=>p.branch&&p.branch!=='project'); }
+function allProj() { return STATE.projects.filter(p=>p.branch==='project'); }
+
+function srcLabel(v) { const s = SOURCES.find(x=>x.v===v); return s ? s.l : v; }
+function scoreClass(v) { if(v>=8) return 'score-high'; if(v>=5) return 'score-mid'; return 'score-low'; }
+
+// ═══════════════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════════════
+function renderAll() {
+    const sp = sorted();
+    const totalAvail = getTotalAvailableHrs();
+    document.getElementById('headerStats').textContent = sp.length + ' projets · ' + STATE.people.length + ' ressources · ' + totalAvail + 'h/sem dispo.';
+    renderWorkflow();
+    renderTriage();
+    renderPortfolio();
+    renderScoring();
+    renderPeople();
+    renderAssign();
+    renderRecommend();
+    renderAnalysis();
+    renderGate0();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WORKFLOW
+// ═══════════════════════════════════════════════════════════════
+function renderWorkflow() {
+    let html = '';
+
+    // ── Helper: main step card ──
+    function stepCard(num, icon, title, desc, color, action, tab) {
+        return `<div class="workflow-step" onclick="goTab('${tab}')">
+            <div class="workflow-step-icon" style="background:${color}">${icon}</div>
+            <div style="flex:1">
+                <div class="workflow-step-label" style="color:${color}">Étape ${num}</div>
+                <h3>${title}</h3>
+                <p>${desc}</p>
+            </div>
+            <div class="workflow-step-action" style="background:${color}22;color:${color}">${action} →</div>
+        </div>`;
+    }
+    function connector() {
+        return '<div class="workflow-connector"><div class="workflow-connector-line"></div></div>';
+    }
+
+    // ── Étape 1: Triage ──
+    html += stepCard(1, '🎯', 'Triage', 'Classifier: Projet, Amélioration, Billet TI ou Opération', 'var(--primary)', 'Démarrer', 'triage');
+    html += connector();
+
+    // ── Étape 2: Charte de projet ──
+    html += stepCard(2, '📋', 'Charte de projet', 'Documenter sponsor, objectif, portée, budget, échéancier', 'var(--primary-light)', 'Portefeuille', 'portfolio');
+    html += connector();
+
+    // ── Étape 3: Scoring + side input (Poids/critères) ──
+    html += `<div class="workflow-row">
+        <div style="flex:1">`;
+    html += stepCard(3, '⭐', 'Scoring / Priorisation', '6 critères pondérés × 10 points — prioriser par score pondéré', '#2c7a7b', 'Scorer', 'scoring');
+    html += `</div>
+        <div class="workflow-arrow-left">◀</div>
+        <div class="workflow-side-input" onclick="openWeightsEditor()" style="cursor:pointer" title="Cliquer pour modifier les poids">
+            <div class="side-input-freq">1 fois par quart — Exécutifs</div>
+            <div class="side-input-title">Poids / critères stratégiques</div>
+            <div class="side-input-desc">Pondération des critères de priorisation validée par le comité exécutif</div>
+            <div style="margin-top:0.4rem;font-size:0.72rem;font-weight:600;color:var(--primary-light)">✎ Cliquer pour modifier</div>
+        </div>
+    </div>`;
+    html += connector();
+
+    // ── Étape 4: Ressources requises / projet ──
+    html += `<div class="workflow-step workflow-step-input" onclick="goTab('assign')">
+        <div class="workflow-step-icon" style="background:#6366f1">📊</div>
+        <div style="flex:1">
+            <div class="workflow-step-label" style="color:#6366f1">Étape 4</div>
+            <h3>Ressources requises / projet</h3>
+            <p>Estimer les ressources nécessaires pour chaque projet priorisé</p>
+        </div>
+        <div class="workflow-step-action" style="background:#6366f122;color:#6366f1">Estimer →</div>
+    </div>`;
+    html += connector();
+
+    // ── Étape 5: Analyse de capacité + side input (Ressources dispo) ──
+    html += `<div class="workflow-row">
+        <div style="flex:1">`;
+    html += stepCard(5, '👥', 'Analyse de capacité', 'Résultats: demande vs capacité disponible par personne', 'var(--success)', 'Analyser', 'recommend');
+    html += `</div>
+        <div class="workflow-arrow-left">◀</div>
+        <div class="workflow-side-input" onclick="goTab('people')" style="cursor:pointer" title="Cliquer pour configurer">
+            <div class="side-input-freq">1 fois par quart — Chefs fonctionnels</div>
+            <div class="side-input-title">Ressources disponibles de l'organisation</div>
+            <div class="side-input-desc">Personnes nommées et leur disponibilité h/sem pour projets</div>
+            <div style="margin-top:0.4rem;font-size:0.72rem;font-weight:600;color:var(--primary-light)">✎ Cliquer pour configurer</div>
+        </div>
+    </div>`;
+    html += connector();
+
+    // ── Étape 6: Recommandation Gate 0 ──
+    html += stepCard(6, '🚦', 'Recommandation Gate 0', 'Rapport GO/ATTENTE pour approbation par Samuel et comité', 'var(--accent)', 'Rapport', 'gate0');
+
+    document.getElementById('workflowSteps').innerHTML = html;
+
+    let bhtml = '';
+    Object.entries(BRANCHES).forEach(([k,b]) => {
+        bhtml += `<div class="branch-card" style="background:${b.bg}">
+            <div style="font-size:1.5rem;margin-bottom:0.3rem">${b.icon}</div>
+            <div style="font-size:0.78rem;font-weight:600;color:${b.color}">${b.label}</div>
+            <div style="font-size:0.7rem;color:var(--text-dim);margin-top:0.25rem">${k==='project'?'→ Charte → Scoring → Gate 0':k==='continuous_improvement'?'→ Gabarit DMAIC':k==='it_ticket'?'→ Système billets TI':'→ Retour DMS / Huddle'}</div>
+        </div>`;
+    });
+    document.getElementById('branchCards').innerHTML = bhtml;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TRIAGE
+// ═══════════════════════════════════════════════════════════════
+function renderTriage() {
+    const S = triageState;
+    // Messages
+    let mhtml = '';
+    S.msgs.forEach(m => {
+        mhtml += `<div style="display:flex;justify-content:${m.t==='user'?'flex-end':'flex-start'}">
+            <div class="chat-msg ${m.t}${m.hl?' hl':''}">${esc(m.txt)}</div>
+        </div>`;
+    });
+    // Current question
+    if (S.step === 'qs') {
+        const qs = S.tier===1?TIER1:S.tier===2?TIER2:TIER3;
+        const q = qs[S.qi];
+        if (q) mhtml += `<div style="display:flex;justify-content:flex-start"><div class="chat-msg bot"><b>${esc(q.q)}</b>${q.h?'<div style="font-size:0.78rem;color:var(--text-dim);margin-top:0.2rem">💡 '+esc(q.h)+'</div>':''}</div></div>`;
+    }
+    document.getElementById('chatArea').innerHTML = mhtml;
+    const ca = document.getElementById('chatArea'); ca.scrollTop = ca.scrollHeight;
+
+    // Input
+    let ihtml = '';
+    if (S.step === 'desc') {
+        ihtml = `<div style="display:flex;gap:0.5rem">
+            <input class="form-control" id="triageDescInput" placeholder="Ex: Implanter un nouveau CRM..." onkeydown="if(event.key==='Enter')triageDesc()" style="flex:1">
+            <button class="btn btn-gold" onclick="triageDesc()">Suivant →</button>
+        </div>`;
+    } else if (S.step === 'source') {
+        ihtml = '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0.4rem">';
+        SOURCES.forEach(s => {
+            ihtml += `<button class="btn btn-secondary" style="flex-direction:column;padding:0.5rem;font-size:0.78rem" onclick="triageSrc('${s.v}')"><span style="font-size:1.15rem">${s.icon}</span>${s.l}</button>`;
+        });
+        ihtml += '</div>';
+    } else if (S.step === 'qs') {
+        ihtml = `<div style="display:flex;gap:0.6rem">
+            <button class="btn btn-success" style="flex:1;font-size:1rem" onclick="triageAns(true)">✓ OUI</button>
+            <button class="btn btn-secondary" style="flex:1;font-size:1rem" onclick="triageAns(false)">✗ NON</button>
+        </div>`;
+    } else if (S.step === 'done') {
+        ihtml = `<div style="display:flex;gap:0.6rem;justify-content:center">
+            <button class="btn btn-secondary" onclick="resetTriage()">🔄 Nouvelle évaluation</button>
+            ${S.result==='project'?'<button class="btn btn-gold" onclick="goTab(\'portfolio\')">📋 Portefeuille →</button>':''}
+        </div>`;
+    }
+    document.getElementById('chatInput').innerHTML = ihtml;
+
+    // Tier indicator
+    if (S.step === 'qs') {
+        let th = '';
+        [1,2,3].forEach(t => {
+            th += `<div style="padding:0.2rem 0.6rem;border-radius:12px;font-size:0.72rem;font-weight:500;background:${S.tier===t?'var(--accent)':(S.tier>t?'var(--success)':'var(--border)')};color:${S.tier>=t?'var(--primary-dark)':'var(--text-dim)'}">Niv. ${t}${S.tier>t?' ✓':''}</div>`;
+        });
+        document.getElementById('tierIndicator').innerHTML = th;
+        document.getElementById('tierIndicator').style.display = 'flex';
+    } else {
+        document.getElementById('tierIndicator').style.display = 'none';
+    }
+}
+
+function triageAddMsg(txt, t='bot', hl=false) { triageState.msgs.push({t,txt,hl}); }
+
+function triageDesc() {
+    const inp = document.getElementById('triageDescInput'); if(!inp||!inp.value.trim())return;
+    triageState.desc = inp.value.trim();
+    triageAddMsg(triageState.desc, 'user');
+    triageState.step = 'source';
+    setTimeout(() => { triageAddMsg("D'où provient cette idée/opportunité?"); renderTriage(); }, 200);
+    renderTriage();
+}
+
+function triageSrc(v) {
+    const s = SOURCES.find(x=>x.v===v);
+    triageState.src = v;
+    triageAddMsg(s.icon + ' ' + s.l, 'user');
+    triageState.step = 'qs'; triageState.tier = 1; triageState.qi = 0;
+    setTimeout(() => { triageAddMsg("📋 NIVEAU 1 — Filtrage rapide\nUn seul OUI = probablement un PROJET",'bot',true); renderTriage(); }, 200);
+    renderTriage();
+}
+
+function triageAns(a) {
+    const S = triageState;
+    const qs = S.tier===1?TIER1:S.tier===2?TIER2:TIER3;
+    const q = qs[S.qi]; S.ans[q.id] = a;
+    triageAddMsg(a?'✓ OUI':'✗ NON','user');
+    const nqi = S.qi + 1;
+    if (nqi >= qs.length) {
+        if (S.tier===1) {
+            if (TIER1.some(q=>S.ans[q.id])) { triageFinish('project'); return; }
+            S.tier=2; S.qi=0;
+            setTimeout(()=>{triageAddMsg("✓ Aucun critère projet\nNIVEAU 2 — Classification",'bot',true);renderTriage();},200);
+        } else if (S.tier===2) {
+            if (S.ans.bug_ti) { triageFinish('it_ticket'); return; }
+            if (S.ans.processus_existant && S.ans.equipe_existante) { triageFinish('operations'); return; }
+            if (S.ans.processus_existant) { triageFinish('continuous_improvement'); return; }
+            S.tier=3; S.qi=0;
+            setTimeout(()=>{triageAddMsg("🔍 Ambiguë — questions supplémentaires...",'bot',true);renderTriage();},200);
+        } else {
+            triageFinish(TIER3.filter(q=>S.ans[q.id]).length>=2?'project':'continuous_improvement');
+            return;
+        }
+    } else { S.qi = nqi; }
+    renderTriage();
+}
+
+function triageFinish(bk) {
+    const S = triageState; const b = BRANCHES[bk]; S.result = bk; S.step = 'done';
+    triageAddMsg(b.icon + ' Verdict: ' + b.label, 'bot', true);
+    STATE.projects.push({ id:gid(), name:S.desc, chef:'', source:S.src, branch:bk, charter:{}, scores:bk==='project'?null:undefined, resources:0, triageDate:new Date().toISOString().split('T')[0] });
+    saveState(); notify('"'+S.desc+'" ajouté au portefeuille'); renderTriage();
+}
+
+function resetTriage() {
+    triageState = { step:'desc', desc:'', src:'', ans:{}, tier:1, qi:0, result:null, msgs:[{t:'bot',txt:'👋 Bienvenue! Décrivez l\'idée ou l\'opportunité à évaluer.',hl:true}] };
+    renderTriage();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PORTFOLIO
+// ═══════════════════════════════════════════════════════════════
+function renderPortfolio() {
+    const ap = allProj(); const np = nonProj();
+    let html = '<h3 style="font-size:0.88rem;font-weight:600;color:var(--project-color);margin-bottom:0.75rem">📋 Projets ('+ap.length+')</h3>';
+    ap.forEach(p => {
+        html += `<div class="card" style="display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem">
+            <div style="width:5px;height:40px;border-radius:3px;background:${p.scores?'var(--success)':'var(--border)'}"></div>
+            <div style="flex:1">
+                <div style="font-weight:600;font-size:0.95rem">${esc(p.name)}</div>
+                <div style="display:flex;gap:0.75rem;margin-top:0.2rem;font-size:0.78rem;color:var(--text-dim)">
+                    ${p.chef?'<span>Chef: '+esc(p.chef)+'</span>':''}
+                    <span>${srcLabel(p.source)}</span><span>${p.triageDate||''}</span>
+                </div>
+            </div>
+            ${p.scores?'<span class="badge badge-scored">'+pct(p.scores)+'%</span>':'<span class="badge badge-unscored">Non scoré</span>'}
+            <button class="btn btn-secondary" style="padding:0.35rem 0.7rem;font-size:0.78rem" onclick="openCharter('${p.id}')">Charte ✏️</button>
+            <button class="btn-remove" style="width:28px;height:28px" onclick="removeProject('${p.id}')">×</button>
+        </div>`;
+    });
+    if (np.length) {
+        html += '<h3 style="font-size:0.88rem;font-weight:600;color:var(--text-dim);margin:1.25rem 0 0.75rem">Autres initiatives ('+np.length+')</h3>';
+        np.forEach(p => {
+            const b = BRANCHES[p.branch];
+            html += `<div style="background:${b?.bg||'var(--bg-card)'};border-radius:10px;padding:0.7rem 1rem;border:1px solid var(--border);display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem">
+                <span style="font-size:1.15rem">${b?.icon||''}</span>
+                <div style="flex:1"><div style="font-size:0.88rem;font-weight:500">${esc(p.name)}</div><div style="font-size:0.75rem;color:${b?.color||'var(--text-dim)'};font-weight:500">${b?.label||''}</div></div>
+                <span style="font-size:0.75rem;color:var(--text-dim)">${p.triageDate||''}</span>
+                <button class="btn-remove" style="width:24px;height:24px;font-size:0.8rem" onclick="removeProject('${p.id}')">×</button>
+            </div>`;
+        });
+    }
+    document.getElementById('portfolioList').innerHTML = html;
+}
+
+function removeProject(id) { const n = STATE.projects.find(p=>p.id===id)?.name; STATE.projects = STATE.projects.filter(p=>p.id!==id); saveState(); renderAll(); notify('"'+n+'" retiré','warn'); }
+
+// ═══════════════════════════════════════════════════════════════
+// CHARTER MODAL (CharterPro-style)
+// ═══════════════════════════════════════════════════════════════
+function openCharter(id) {
+    currentCharterProject = STATE.projects.find(p => p.id === id);
+    if (!currentCharterProject) return;
+    if (!currentCharterProject.charter) currentCharterProject.charter = {};
+    charterStep = 1;
+    document.getElementById('charterModalTitle').textContent = 'Charte — ' + currentCharterProject.name;
+    renderCharterSidebar();
+    renderCharterStep();
+    document.getElementById('charterModal').style.display = 'flex';
+}
+
+function closeCharter() { document.getElementById('charterModal').style.display = 'none'; currentCharterProject = null; }
+
+function renderCharterSidebar() {
+    let html = '<div class="sidebar-title">Sections de la charte</div>';
+    CHARTER_STEPS.forEach(s => {
+        html += `<div class="step-item${charterStep===s.n?' active':''}${charterStep>s.n?' completed':''}" onclick="charterGoStep(${s.n})">
+            <div class="step-number">${charterStep>s.n?'✓':s.n}</div>
+            <div class="step-info"><h4>${s.title}</h4><p>${s.sub}</p></div>
+        </div>`;
+    });
+    document.getElementById('charterSidebar').innerHTML = html;
+}
+
+function charterGoStep(n) { charterStep = n; renderCharterSidebar(); renderCharterStep(); }
+
+function charterVal(field) { return currentCharterProject?.charter?.[field] || ''; }
+function charterArr(field) { return currentCharterProject?.charter?.[field] || []; }
+
+function renderCharterStep() {
+    const p = currentCharterProject; const c = p.charter || {};
+    let html = '';
+    const sn = charterStep;
+
+    if (sn === 1) {
+        html = `<div class="step-header"><h2>Informations de base</h2><p>Commencez par les informations fondamentales du projet.</p></div>
+        <div class="form-section"><div class="form-section-title">📋 Informations du projet</div>
+            <div class="form-group"><label class="form-label">Nom du projet <span class="req">*</span></label>
+                <input class="form-control" id="c_name" value="${esc(p.name)}" onchange="charterAutoSave()"></div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Type de projet</label>
+                    <select class="form-control" id="c_type" onchange="charterAutoSave()">
+                        <option value="">Sélectionner...</option>
+                        ${['Software Development','Mobile Development','Construction','Business Transformation','Marketing / Creative','Infrastructure','R&D','Autre'].map(t=>'<option value="'+t+'"'+(c.type===t?' selected':'')+'>'+t+'</option>').join('')}
+                    </select></div>
+                <div class="form-group"><label class="form-label">Priorité</label>
+                    <select class="form-control" id="c_priority" onchange="charterAutoSave()">
+                        ${['High','Medium','Low'].map(t=>'<option value="'+t+'"'+(c.priority===t?' selected':'')+'>'+t+'</option>').join('')}
+                    </select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Date de début</label><input type="date" class="form-control" id="c_startDate" value="${c.startDate||''}" onchange="charterAutoSave()"></div>
+                <div class="form-group"><label class="form-label">Date fin cible</label><input type="date" class="form-control" id="c_endDate" value="${c.endDate||''}" onchange="charterAutoSave()"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Chef de projet</label><input class="form-control" id="c_chef" value="${esc(p.chef)}" onchange="charterAutoSave()"></div>
+                <div class="form-group"><label class="form-label">Ressources (jours-personne)</label><input type="number" class="form-control" id="c_resources" value="${p.resources||0}" min="0" onchange="charterAutoSave()"></div>
+            </div>
+        </div>`;
+    } else if (sn === 2) {
+        const objs = charterArr('objectives');
+        html = `<div class="step-header"><h2>Sommaire & Objectifs</h2><p>Décrivez ce que ce projet vise à accomplir.</p></div>
+        <div class="form-section"><div class="form-section-title">📝 Sommaire exécutif</div>
+            <div class="form-group"><label class="form-label">Description du projet <span class="req">*</span></label>
+                <textarea class="form-control" id="c_overview" onchange="charterAutoSave()" placeholder="Description de haut niveau...">${esc(c.overview||'')}</textarea>
+                <p class="form-hint">Ce texte apparaîtra en tête de la charte. Soyez clair et convaincant.</p></div>
+        </div>
+        <div class="form-section"><div class="form-section-title">🎯 Objectifs du projet</div>
+            <p class="form-hint" style="margin-bottom:0.75rem">Listez les objectifs spécifiques et mesurables.</p>
+            <div class="dynamic-list" id="c_objectivesList">
+                ${(objs.length?objs:['']).map((o,i)=>`<div class="dynamic-item"><input class="form-control" value="${esc(o)}" placeholder="Ex: Réduire les tickets support de 40%" onchange="charterAutoSave()"><button class="btn-remove" onclick="this.parentElement.remove();charterAutoSave()">×</button></div>`).join('')}
+            </div>
+            <button class="btn-add" onclick="addCharterListItem('c_objectivesList','objectif')">+ Ajouter un objectif</button>
+        </div>`;
+    } else if (sn === 3) {
+        const dels = charterArr('deliverables');
+        html = `<div class="step-header"><h2>Portée du projet</h2><p>Définissez ce qui est inclus et exclu.</p></div>
+        <div class="form-section"><div class="form-section-title">✅ Inclus dans la portée</div>
+            <div class="form-group"><textarea class="form-control" id="c_inScope" onchange="charterAutoSave()" placeholder="Livrables, fonctionnalités, paquets de travail inclus...">${esc(c.inScope||'')}</textarea></div>
+        </div>
+        <div class="form-section"><div class="form-section-title">❌ Exclus de la portée</div>
+            <div class="form-group"><textarea class="form-control" id="c_outOfScope" onchange="charterAutoSave()" placeholder="Éléments explicitement exclus...">${esc(c.outOfScope||'')}</textarea></div>
+        </div>
+        <div class="form-section"><div class="form-section-title">📦 Livrables clés</div>
+            <div class="dynamic-list" id="c_deliverablesList">
+                ${(dels.length?dels:['']).map(d=>`<div class="dynamic-item"><input class="form-control" value="${esc(d)}" placeholder="Ex: Documentation utilisateur" onchange="charterAutoSave()"><button class="btn-remove" onclick="this.parentElement.remove();charterAutoSave()">×</button></div>`).join('')}
+            </div>
+            <button class="btn-add" onclick="addCharterListItem('c_deliverablesList','livrable')">+ Ajouter un livrable</button>
+        </div>`;
+    } else if (sn === 4) {
+        const sth = charterArr('stakeholders');
+        html = `<div class="step-header"><h2>Parties prenantes</h2><p>Identifiez le sponsor, l'équipe et les rôles clés.</p></div>
+        <div class="form-section"><div class="form-section-title">👔 Sponsor & Chef de projet</div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Sponsor exécutif</label><input class="form-control" id="c_sponsor" value="${esc(c.sponsor||'')}" placeholder="Ex: Samuel Lamoureux" onchange="charterAutoSave()"></div>
+                <div class="form-group"><label class="form-label">Chef de projet</label><input class="form-control" id="c_manager" value="${esc(p.chef)}" onchange="charterAutoSave()"></div>
+            </div>
+        </div>
+        <div class="form-section"><div class="form-section-title">👥 Parties prenantes</div>
+            <div class="dynamic-list" id="c_stakeholdersList">
+                ${(sth.length?sth:[{name:'',role:''}]).map(s=>`<div class="dynamic-item" style="flex-wrap:wrap;gap:0.4rem">
+                    <input class="form-control" style="flex:2;min-width:140px" value="${esc(s.name)}" placeholder="Nom & Titre" onchange="charterAutoSave()">
+                    <input class="form-control" style="flex:1;min-width:90px" value="${esc(s.role)}" placeholder="Rôle" onchange="charterAutoSave()">
+                    <button class="btn-remove" onclick="this.parentElement.remove();charterAutoSave()">×</button>
+                </div>`).join('')}
+            </div>
+            <button class="btn-add" onclick="addCharterStakeholder()">+ Ajouter une partie prenante</button>
+        </div>`;
+    } else if (sn === 5) {
+        const risks = charterArr('risks');
+        html = `<div class="step-header"><h2>Risques & Contraintes</h2><p>Identifiez les risques et les contraintes du projet.</p></div>
+        <div class="form-section"><div class="form-section-title">⚠️ Registre des risques</div>
+            <table class="data-table" id="c_riskTable"><thead><tr><th style="width:35%">Risque</th><th style="width:15%">Impact</th><th style="width:35%">Mitigation</th><th style="width:15%"></th></tr></thead>
+            <tbody>
+                ${(risks.length?risks:[{risk:'',impact:'Medium',mitigation:''}]).map(r=>`<tr>
+                    <td><input placeholder="Décrire le risque..." value="${esc(r.risk)}" onchange="charterAutoSave()"></td>
+                    <td><select onchange="charterAutoSave()"><option value="High"${r.impact==='High'?' selected':''}>Élevé</option><option value="Medium"${r.impact==='Medium'?' selected':''}>Moyen</option><option value="Low"${r.impact==='Low'?' selected':''}>Faible</option></select></td>
+                    <td><input placeholder="Stratégie de mitigation..." value="${esc(r.mitigation)}" onchange="charterAutoSave()"></td>
+                    <td><button class="btn-remove" onclick="this.closest('tr').remove();charterAutoSave()">×</button></td>
+                </tr>`).join('')}
+            </tbody></table>
+            <button class="btn-add" style="margin-top:0.75rem" onclick="addCharterRisk()">+ Ajouter un risque</button>
+        </div>
+        <div class="form-section"><div class="form-section-title">🔒 Contraintes & Hypothèses</div>
+            <div class="form-group"><label class="form-label">Contraintes</label><textarea class="form-control" id="c_constraints" onchange="charterAutoSave()" placeholder="Limitations et contraintes du projet...">${esc(c.constraints||'')}</textarea></div>
+            <div class="form-group"><label class="form-label">Hypothèses</label><textarea class="form-control" id="c_assumptions" onchange="charterAutoSave()" placeholder="Hypothèses nécessaires au succès...">${esc(c.assumptions||'')}</textarea></div>
+        </div>`;
+    } else if (sn === 6) {
+        const ms = charterArr('milestones');
+        html = `<div class="step-header"><h2>Échéancier & Budget</h2><p>Définissez les jalons, le budget et les projections financières.</p></div>
+        <div class="form-section"><div class="form-section-title">📅 Jalons du projet</div>
+            <table class="data-table" id="c_milestoneTable"><thead><tr><th style="width:40%">Phase / Jalon</th><th style="width:20%">Durée</th><th style="width:25%">Date cible</th><th style="width:15%"></th></tr></thead>
+            <tbody>
+                ${(ms.length?ms:[{phase:'',duration:'',date:''}]).map(m=>`<tr>
+                    <td><input placeholder="Ex: Analyse des besoins" value="${esc(m.phase)}" onchange="charterAutoSave()"></td>
+                    <td><input placeholder="Ex: 3 mois" value="${esc(m.duration)}" onchange="charterAutoSave()"></td>
+                    <td><input placeholder="Ex: Avr 2026" value="${esc(m.date)}" onchange="charterAutoSave()"></td>
+                    <td><button class="btn-remove" onclick="this.closest('tr').remove();charterAutoSave()">×</button></td>
+                </tr>`).join('')}
+            </tbody></table>
+            <button class="btn-add" style="margin-top:0.75rem" onclick="addCharterMilestone()">+ Ajouter un jalon</button>
+        </div>
+        <div class="form-section"><div class="form-section-title">💰 Budget & Finances</div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Budget total</label><input class="form-control" id="c_budget" value="${esc(c.budget||'')}" placeholder="Ex: 150 000$" onchange="charterAutoSave();charterCalcROI()"></div>
+                <div class="form-group"><label class="form-label">Bénéfices annuels attendus</label><input class="form-control" id="c_benefits" value="${esc(c.benefits||'')}" placeholder="Ex: 200 000$" onchange="charterAutoSave();charterCalcROI()"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label class="form-label">Durée du projet (années)</label><input type="number" class="form-control" id="c_duration" value="${c.duration||''}" step="0.1" placeholder="Ex: 1.5" onchange="charterAutoSave();charterCalcROI()"></div>
+                <div class="form-group"><label class="form-label">Période de bénéfices (années)</label><input type="number" class="form-control" id="c_benefitPeriod" value="${c.benefitPeriod||''}" placeholder="Ex: 3" onchange="charterAutoSave();charterCalcROI()"></div>
+            </div>
+        </div>
+        <div class="form-section"><div class="form-section-title">📊 Métriques calculées</div>
+            <div class="metrics-grid"><div class="metric-card"><div class="metric-value" id="c_roi">--%</div><div class="metric-label">ROI</div></div>
+                <div class="metric-card"><div class="metric-value" id="c_payback">-- ans</div><div class="metric-label">Période de retour</div></div>
+                <div class="metric-card"><div class="metric-value" id="c_npv">$--</div><div class="metric-label">VAN</div></div></div>
+            <p class="form-hint">Calculées automatiquement à partir du budget et des bénéfices.</p>
+        </div>`;
+    } else if (sn === 7) {
+        charterAutoSave();
+        html = `<div class="step-header"><h2>Aperçu & Export</h2><p>Révisez la charte et exportez en PDF.</p></div>
+        <div class="no-print" style="margin-bottom:1rem;display:flex;gap:0.75rem">
+            <button class="btn btn-success" onclick="window.print()">📄 Exporter PDF</button>
+            <button class="btn btn-gold" onclick="saveCharter()">💾 Sauvegarder</button>
+        </div>
+        ${buildCharterPreview()}`;
+    }
+
+    // Navigation
+    html += `<div class="step-nav no-print">
+        ${sn>1?'<button class="btn btn-secondary" onclick="charterGoStep('+(sn-1)+')">← Précédent</button>':'<div></div>'}
+        ${sn<7?'<button class="btn btn-gold" onclick="charterGoStep('+(sn+1)+')">Suivant →</button>':'<button class="btn btn-gold" onclick="saveCharter()">💾 Sauvegarder & Fermer</button>'}
+    </div>`;
+    document.getElementById('charterMain').innerHTML = html;
+    document.getElementById('charterMain').scrollTop = 0;
+
+    if (sn === 6) charterCalcROI();
+}
+
+function charterCalcROI() {
+    const bStr = (document.getElementById('c_budget')?.value||'').replace(/[^0-9.]/g,'');
+    const benStr = (document.getElementById('c_benefits')?.value||'').replace(/[^0-9.]/g,'');
+    const dur = parseFloat(document.getElementById('c_duration')?.value) || 1;
+    const bp = parseFloat(document.getElementById('c_benefitPeriod')?.value) || 3;
+    const b = parseFloat(bStr)||0; const an = parseFloat(benStr)||0;
+    if (b>0 && an>0) {
+        const roi = ((an*bp - b)/b)*100;
+        const pay = b/an;
+        let npv = -b; for(let i=1;i<=bp;i++) npv += an/Math.pow(1.1,i);
+        document.getElementById('c_roi').textContent = roi.toFixed(1)+'%';
+        document.getElementById('c_payback').textContent = pay.toFixed(1)+' ans';
+        document.getElementById('c_npv').textContent = '$'+fmt(Math.round(npv));
+    }
+}
+
+function charterAutoSave() {
+    if (!currentCharterProject) return;
+    const c = currentCharterProject.charter || {};
+    const sn = charterStep;
+    if (sn===1) {
+        const nameEl = document.getElementById('c_name');
+        if(nameEl) currentCharterProject.name = nameEl.value;
+        c.type = document.getElementById('c_type')?.value||'';
+        c.priority = document.getElementById('c_priority')?.value||'';
+        c.startDate = document.getElementById('c_startDate')?.value||'';
+        c.endDate = document.getElementById('c_endDate')?.value||'';
+        currentCharterProject.chef = document.getElementById('c_chef')?.value||'';
+        currentCharterProject.resources = parseInt(document.getElementById('c_resources')?.value)||0;
+    } else if (sn===2) {
+        c.overview = document.getElementById('c_overview')?.value||'';
+        c.objectives = collectDynList('c_objectivesList');
+    } else if (sn===3) {
+        c.inScope = document.getElementById('c_inScope')?.value||'';
+        c.outOfScope = document.getElementById('c_outOfScope')?.value||'';
+        c.deliverables = collectDynList('c_deliverablesList');
+    } else if (sn===4) {
+        c.sponsor = document.getElementById('c_sponsor')?.value||'';
+        currentCharterProject.chef = document.getElementById('c_manager')?.value||currentCharterProject.chef;
+        c.stakeholders = collectStakeholders('c_stakeholdersList');
+    } else if (sn===5) {
+        c.risks = collectRisks('c_riskTable');
+        c.constraints = document.getElementById('c_constraints')?.value||'';
+        c.assumptions = document.getElementById('c_assumptions')?.value||'';
+    } else if (sn===6) {
+        c.milestones = collectMilestones('c_milestoneTable');
+        c.budget = document.getElementById('c_budget')?.value||'';
+        c.benefits = document.getElementById('c_benefits')?.value||'';
+        c.duration = document.getElementById('c_duration')?.value||'';
+        c.benefitPeriod = document.getElementById('c_benefitPeriod')?.value||'';
+    }
+    currentCharterProject.charter = c;
+    document.getElementById('charterSaveStatus').textContent = '✓ Sauvegardé';
+    document.getElementById('charterSaveStatus').style.color = '#22c55e';
+}
+
+function saveCharter() { charterAutoSave(); saveState(); renderAll(); closeCharter(); notify('Charte sauvegardée'); }
+
+// Dynamic list helpers
+function collectDynList(id) { const items=[]; document.querySelectorAll('#'+id+' .dynamic-item input').forEach(inp=>{if(inp.value.trim())items.push(inp.value.trim());}); return items; }
+function collectStakeholders(id) { const items=[]; document.querySelectorAll('#'+id+' .dynamic-item').forEach(item=>{const inps=item.querySelectorAll('input');if(inps[0]?.value.trim()) items.push({name:inps[0].value.trim(),role:inps[1]?.value.trim()||''});}); return items; }
+function collectRisks(id) { const items=[]; document.querySelectorAll('#'+id+' tbody tr').forEach(row=>{const inps=row.querySelectorAll('input');const sel=row.querySelector('select');if(inps[0]?.value.trim()) items.push({risk:inps[0].value.trim(),impact:sel?.value||'Medium',mitigation:inps[1]?.value.trim()||''});}); return items; }
+function collectMilestones(id) { const items=[]; document.querySelectorAll('#'+id+' tbody tr').forEach(row=>{const inps=row.querySelectorAll('input');if(inps[0]?.value.trim()) items.push({phase:inps[0].value.trim(),duration:inps[1]?.value.trim()||'',date:inps[2]?.value.trim()||''});}); return items; }
+
+function addCharterListItem(listId) { const list=document.getElementById(listId); const div=document.createElement('div'); div.className='dynamic-item'; div.innerHTML='<input class="form-control" placeholder="..." onchange="charterAutoSave()"><button class="btn-remove" onclick="this.parentElement.remove();charterAutoSave()">×</button>'; list.appendChild(div); }
+function addCharterStakeholder() { const list=document.getElementById('c_stakeholdersList'); const div=document.createElement('div'); div.className='dynamic-item'; div.style.cssText='flex-wrap:wrap;gap:0.4rem'; div.innerHTML='<input class="form-control" style="flex:2;min-width:140px" placeholder="Nom & Titre" onchange="charterAutoSave()"><input class="form-control" style="flex:1;min-width:90px" placeholder="Rôle" onchange="charterAutoSave()"><button class="btn-remove" onclick="this.parentElement.remove();charterAutoSave()">×</button>'; list.appendChild(div); }
+function addCharterRisk() { const tb=document.querySelector('#c_riskTable tbody'); const tr=document.createElement('tr'); tr.innerHTML='<td><input placeholder="Décrire le risque..." onchange="charterAutoSave()"></td><td><select onchange="charterAutoSave()"><option value="High">Élevé</option><option value="Medium" selected>Moyen</option><option value="Low">Faible</option></select></td><td><input placeholder="Stratégie..." onchange="charterAutoSave()"></td><td><button class="btn-remove" onclick="this.closest(\'tr\').remove();charterAutoSave()">×</button></td>'; tb.appendChild(tr); }
+function addCharterMilestone() { const tb=document.querySelector('#c_milestoneTable tbody'); const tr=document.createElement('tr'); tr.innerHTML='<td><input placeholder="Phase..." onchange="charterAutoSave()"></td><td><input placeholder="Durée..." onchange="charterAutoSave()"></td><td><input placeholder="Date..." onchange="charterAutoSave()"></td><td><button class="btn-remove" onclick="this.closest(\'tr\').remove();charterAutoSave()">×</button></td>'; tb.appendChild(tr); }
+
+function buildCharterPreview() {
+    const p=currentCharterProject; const c=p?.charter||{};
+    const bStr=(c.budget||'').replace(/[^0-9.]/g,''); const benStr=(c.benefits||'').replace(/[^0-9.]/g,'');
+    const b=parseFloat(bStr)||0; const an=parseFloat(benStr)||0; const bp=parseFloat(c.benefitPeriod)||3;
+    let roi='--',pay='--',npv='--';
+    if(b>0&&an>0){ roi=((an*bp-b)/b*100).toFixed(1)+'%'; pay=(b/an).toFixed(1)+' ans'; let n=-b;for(let i=1;i<=bp;i++)n+=an/Math.pow(1.1,i);npv='$'+fmt(Math.round(n)); }
+
+    let h = `<div class="preview-panel"><div class="preview-header">
+        <div style="font-size:1.5rem;margin-bottom:0.3rem">📋</div>
+        <h1 class="preview-title">${esc(p.name)||'Charte de projet'}</h1>
+        <p class="preview-subtitle">${esc(c.type)||'Type de projet'}</p>
+        <div class="preview-meta"><span>Date: ${c.startDate?new Date(c.startDate).toLocaleDateString('fr-CA',{month:'long',year:'numeric'}):'--'}</span><span>Priorité: ${c.priority||'--'}</span></div>
+    </div><div class="preview-body">`;
+    if(c.overview) h+=`<div class="preview-section"><h3 class="preview-section-title">Sommaire du projet</h3><p>${esc(c.overview)}</p></div>`;
+    if(b>0) h+=`<div class="preview-section"><h3 class="preview-section-title">Sommaire financier</h3><div class="preview-metrics"><div class="preview-metric"><div class="preview-metric-value">${roi}</div><div class="preview-metric-label">ROI</div></div><div class="preview-metric"><div class="preview-metric-value">${esc(c.budget)||'--'}</div><div class="preview-metric-label">Budget</div></div><div class="preview-metric"><div class="preview-metric-value">${pay}</div><div class="preview-metric-label">Retour</div></div></div>
+        <table class="preview-table"><tr><th>Métrique</th><th>Valeur</th></tr><tr><td>VAN</td><td>${npv}</td></tr><tr><td>Sponsor</td><td>${esc(c.sponsor)||'--'}</td></tr><tr><td>Chef de projet</td><td>${esc(p.chef)||'--'}</td></tr></table></div>`;
+    if(c.objectives?.length) h+=`<div class="preview-section"><h3 class="preview-section-title">Objectifs</h3><ul class="preview-list">${c.objectives.map(o=>'<li>'+esc(o)+'</li>').join('')}</ul></div>`;
+    if(c.inScope||c.outOfScope) h+=`<div class="preview-section"><h3 class="preview-section-title">Portée</h3>${c.inScope?'<p><b>Inclus:</b> '+esc(c.inScope)+'</p>':''}${c.outOfScope?'<p><b>Exclu:</b> '+esc(c.outOfScope)+'</p>':''}</div>`;
+    if(c.deliverables?.length) h+=`<div class="preview-section"><h3 class="preview-section-title">Livrables clés</h3><ul class="preview-list">${c.deliverables.map(d=>'<li>'+esc(d)+'</li>').join('')}</ul></div>`;
+    if(c.risks?.length&&c.risks[0]?.risk) h+=`<div class="preview-section"><h3 class="preview-section-title">Évaluation des risques</h3><table class="preview-table"><tr><th>Risque</th><th>Impact</th><th>Mitigation</th></tr>${c.risks.filter(r=>r.risk).map(r=>'<tr><td>'+esc(r.risk)+'</td><td>'+r.impact+'</td><td>'+esc(r.mitigation)+'</td></tr>').join('')}</table></div>`;
+    if(c.milestones?.length&&c.milestones[0]?.phase) h+=`<div class="preview-section"><h3 class="preview-section-title">Échéancier</h3><table class="preview-table"><tr><th>Phase</th><th>Durée</th><th>Cible</th></tr>${c.milestones.filter(m=>m.phase).map(m=>'<tr><td>'+esc(m.phase)+'</td><td>'+esc(m.duration)+'</td><td>'+esc(m.date)+'</td></tr>').join('')}</table></div>`;
+    if(c.constraints||c.assumptions) h+=`<div class="preview-section"><h3 class="preview-section-title">Contraintes & Hypothèses</h3>${c.constraints?'<p><b>Contraintes:</b> '+esc(c.constraints)+'</p>':''}${c.assumptions?'<p><b>Hypothèses:</b> '+esc(c.assumptions)+'</p>':''}</div>`;
+    h+=`</div></div>`;
+    return h;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCORING
+// ═══════════════════════════════════════════════════════════════
+function renderScoring() {
+    const ap = [...allProj()].sort((a,b)=>weightedScore(b.scores||{})-weightedScore(a.scores||{}));
+    const w = STATE.weights;
+    const totalW = CRITERIA.reduce((s,c)=>s+(w[c.id]||0),0);
+    const warnW = totalW !== 100;
+
+    let html = '<table class="scoring-table"><thead><tr><th>#</th><th>Projet</th><th>Chef</th>';
+    CRITERIA.forEach(c => html += `<th title="${c.hint}"><div>${c.short}</div><div style="font-size:0.65rem;font-weight:400;opacity:0.85;margin-top:2px">${w[c.id]||0}%</div></th>`);
+    html += '<th style="background:var(--primary-light)"><div>Pondéré</div><div style="font-size:0.65rem;font-weight:400;opacity:0.85;margin-top:2px">/10</div></th><th>%</th><th>h/mois</th></tr></thead><tbody>';
+    ap.forEach((p,i) => {
+        const sc=p.scores||{}; const ws=weightedScore(sc); const pc=pct(sc); const pn=parseFloat(pc);
+        html += `<tr><td style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(66,153,225,0.15);color:var(--project-color);font-size:0.75rem;font-weight:700">${i+1}</span></td>
+        <td style="font-weight:500">${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)||'—'}</td>`;
+        CRITERIA.forEach(c => {
+            html += `<td style="text-align:center"><input type="number" min="1" max="10" class="scoring-input ${sc[c.id]?scoreClass(sc[c.id]):''}" value="${sc[c.id]||''}" onchange="updateScore('${p.id}','${c.id}',this.value)"></td>`;
+        });
+        html += `<td style="text-align:center;font-weight:700;font-size:1.05rem;color:var(--accent)">${ws?ws.toFixed(1):'—'}</td>
+        <td style="text-align:center"><span class="badge ${pn>=80?'badge-go':pn>=65?'badge-unscored':'badge-attente'}">${ws?pc+'%':'—'}</span></td>
+        <td style="text-align:center"><span style="font-size:0.85rem;color:var(--text-dim);cursor:pointer" title="Modifier dans l'onglet Affectation" onclick="goTab('assign')">${getProjectTotalHrs(p.id) || '—'}<span style="font-size:0.65rem">h/s</span></span></td></tr>`;
+    });
+    html += '</tbody></table>';
+
+    // Weight warning
+    if (warnW) {
+        html += `<div style="margin-top:0.75rem;padding:0.6rem 1rem;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:0.82rem;color:#92400e">⚠️ Les poids totalisent <b>${totalW}%</b> au lieu de 100%. <button onclick="openWeightsEditor()" style="margin-left:0.5rem;background:var(--accent);color:white;border:none;padding:0.25rem 0.65rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600">Ajuster les poids</button></div>`;
+    }
+    document.getElementById('scoringTableWrap').innerHTML = html;
+
+    // Legend + Score Guide
+    let lhtml = '';
+
+    // Score guide
+    lhtml += `<div style="margin-bottom:1rem;padding:1rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:10px">
+        <div style="font-size:0.78rem;font-weight:600;color:var(--primary);text-transform:uppercase;margin-bottom:0.5rem">📏 Guide de notation</div>
+        <div style="display:flex;gap:1.5rem;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:0.5rem"><span class="scoring-input score-high" style="display:inline-flex;align-items:center;justify-content:center;pointer-events:none">10</span><span style="font-size:0.82rem;color:var(--text-muted)">Parfaitement conforme</span></div>
+            <div style="display:flex;align-items:center;gap:0.5rem"><span class="scoring-input score-high" style="display:inline-flex;align-items:center;justify-content:center;pointer-events:none">8</span><span style="font-size:0.82rem;color:var(--text-muted)">Très conforme</span></div>
+            <div style="display:flex;align-items:center;gap:0.5rem"><span class="scoring-input score-mid" style="display:inline-flex;align-items:center;justify-content:center;pointer-events:none">5</span><span style="font-size:0.82rem;color:var(--text-muted)">Partiellement conforme</span></div>
+            <div style="display:flex;align-items:center;gap:0.5rem"><span class="scoring-input score-low" style="display:inline-flex;align-items:center;justify-content:center;pointer-events:none">3</span><span style="font-size:0.82rem;color:var(--text-muted)">Peu conforme</span></div>
+            <div style="display:flex;align-items:center;gap:0.5rem"><span class="scoring-input score-low" style="display:inline-flex;align-items:center;justify-content:center;pointer-events:none">1</span><span style="font-size:0.82rem;color:var(--text-muted)">Non conforme</span></div>
+        </div>
+    </div>`;
+
+    // Criteria legend + edit weights button
+    lhtml += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+        <div style="font-size:0.78rem;font-weight:600;color:var(--text-dim);text-transform:uppercase">Légende des critères</div>
+        <button onclick="openWeightsEditor()" class="btn" style="padding:0.3rem 0.75rem;font-size:0.78rem;background:#f0fdf4;color:var(--success);border:1px solid #bbf7d0">⚖️ Modifier les poids</button>
+    </div>`;
+    lhtml += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem">';
+    CRITERIA.forEach(c => lhtml += `<div style="font-size:0.78rem;color:var(--text-muted)"><b>${c.short}</b> (${w[c.id]||0}%) — ${c.label}<br><span style="color:var(--text-dim)">${c.hint}</span></div>`);
+    lhtml += '</div>';
+    document.getElementById('criteriaLegend').innerHTML = lhtml;
+}
+
+function updateScore(id, crit, val) {
+    const p = STATE.projects.find(x=>x.id===id); if(!p) return;
+    if(!p.scores) p.scores = {};
+    p.scores[crit] = Math.min(10, Math.max(0, parseInt(val)||0));
+    saveState(); renderScoring(); renderAll();
+}
+function updateRes(id, val) { const p = STATE.projects.find(x=>x.id===id); if(p) p.resources = parseInt(val)||0; saveState(); renderAll(); }
+
+// ═══════════════════════════════════════════════════════════════
+// WEIGHTS EDITOR
+// ═══════════════════════════════════════════════════════════════
+function openWeightsEditor() {
+    const w = STATE.weights;
+    let html = `<div class="modal-overlay" id="weightsOverlay" onclick="if(event.target===this)closeWeights()">
+    <div class="modal-box" style="max-width:640px">
+        <div class="charter-modal-header">
+            <div style="display:flex;align-items:center;gap:0.6rem">
+                <div class="charter-logo-icon">⚖️</div>
+                <span class="charter-modal-title">Poids des critères stratégiques</span>
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+                <button class="charter-btn-close" onclick="closeWeights()">✕ Fermer</button>
+                <button class="charter-btn-save" onclick="saveWeights()">💾 Appliquer</button>
+            </div>
+        </div>
+        <div style="padding:1.5rem">
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.25rem">Définissez l'importance relative de chaque critère pour le calcul du score pondéré.</p>
+            <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:1.25rem;font-style:italic">🔄 Validé 1 fois par trimestre par le comité exécutif. Les poids doivent totaliser 100%.</p>
+
+            <table style="width:100%;border-collapse:collapse">
+            <thead><tr>
+                <th style="text-align:left;padding:0.6rem;font-size:0.78rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border)">Critère</th>
+                <th style="text-align:left;padding:0.6rem;font-size:0.78rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border)">Description</th>
+                <th style="text-align:center;padding:0.6rem;font-size:0.78rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);width:90px">Poids (%)</th>
+            </tr></thead>
+            <tbody>`;
+
+    CRITERIA.forEach(c => {
+        html += `<tr>
+            <td style="padding:0.7rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;font-size:0.9rem">${c.short}</td>
+            <td style="padding:0.7rem 0.6rem;border-bottom:1px solid var(--border)">
+                <div style="font-size:0.85rem;color:var(--text)">${c.label}</div>
+                <div style="font-size:0.75rem;color:var(--text-dim)">${c.hint}</div>
+            </td>
+            <td style="padding:0.7rem 0.6rem;border-bottom:1px solid var(--border);text-align:center">
+                <input type="number" min="0" max="100" id="w_${c.id}" value="${w[c.id]||0}" 
+                    style="width:65px;padding:0.45rem 0.3rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem;font-weight:700;text-align:center"
+                    oninput="updateWeightTotal()">
+            </td>
+        </tr>`;
+    });
+
+    html += `</tbody>
+            <tfoot><tr>
+                <td colspan="2" style="padding:0.7rem 0.6rem;font-weight:700;text-align:right;border-top:2px solid var(--border)">Total</td>
+                <td style="padding:0.7rem 0.6rem;text-align:center;border-top:2px solid var(--border)">
+                    <span id="weightTotalDisplay" style="font-size:1.1rem;font-weight:700">100%</span>
+                </td>
+            </tr></tfoot>
+            </table>
+
+            <div style="margin-top:1rem;display:flex;gap:0.5rem">
+                <button onclick="resetWeightsEqual()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem">↺ Répartition égale</button>
+                <button onclick="resetWeightsDefault()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem">↺ Valeurs par défaut</button>
+            </div>
+        </div>
+    </div></div>`;
+
+    document.body.insertAdjacentHTML('beforeend', html);
+    updateWeightTotal();
+}
+
+function updateWeightTotal() {
+    let total = 0;
+    CRITERIA.forEach(c => { total += parseInt(document.getElementById('w_'+c.id)?.value)||0; });
+    const el = document.getElementById('weightTotalDisplay');
+    if(el) {
+        el.textContent = total + '%';
+        el.style.color = total === 100 ? 'var(--success)' : 'var(--error)';
+    }
+}
+
+function resetWeightsEqual() {
+    const eq = Math.floor(100/CRITERIA.length);
+    const rem = 100 - eq*CRITERIA.length;
+    CRITERIA.forEach((c,i) => { document.getElementById('w_'+c.id).value = eq + (i<rem?1:0); });
+    updateWeightTotal();
+}
+function resetWeightsDefault() {
+    CRITERIA.forEach(c => { document.getElementById('w_'+c.id).value = DEFAULT_WEIGHTS[c.id]; });
+    updateWeightTotal();
+}
+
+function saveWeights() {
+    let total = 0;
+    CRITERIA.forEach(c => { 
+        const v = parseInt(document.getElementById('w_'+c.id)?.value)||0;
+        STATE.weights[c.id] = v;
+        total += v;
+    });
+    if(total !== 100) {
+        if(!confirm(`Les poids totalisent ${total}% au lieu de 100%. Sauvegarder quand même?`)) return;
+    }
+    saveState(); renderScoring(); renderAll();
+    closeWeights();
+    notify('Poids mis à jour — scores recalculés');
+}
+
+function closeWeights() {
+    document.getElementById('weightsOverlay')?.remove();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PEOPLE: Named Resources + Availability
+// ═══════════════════════════════════════════════════════════════
+function renderPeople() {
+    const people = STATE.people;
+    let html = '<div class="card" style="padding:0.75rem"><div style="overflow-x:auto"><table class="scoring-table"><thead><tr>';
+    html += '<th style="text-align:left;min-width:140px">Nom</th>';
+    html += '<th style="text-align:left;min-width:140px">Fonction</th>';
+    html += '<th style="text-align:center" title="Heures par semaine disponibles pour des projets">Dispo. h/sem</th>';
+    html += '<th style="text-align:center">Assigné h/sem</th>';
+    html += '<th style="text-align:center">Écart</th>';
+    html += '<th style="text-align:center;width:200px">Charge</th>';
+    html += '<th style="text-align:center;width:40px"></th>';
+    html += '</tr></thead><tbody>';
+
+    // Group by function
+    const grouped = {};
+    people.forEach(p => {
+        if (!grouped[p.funcId]) grouped[p.funcId] = [];
+        grouped[p.funcId].push(p);
+    });
+
+    let totalAvail = 0, totalAssigned = 0;
+    const funcOrder = FUNCTIONS.map(f=>f.id).filter(fid => grouped[fid]);
+    // Add any functions not in FUNCTIONS list
+    Object.keys(grouped).forEach(fid => { if(!funcOrder.includes(fid)) funcOrder.push(fid); });
+
+    funcOrder.forEach(fid => {
+        const fPeople = grouped[fid] || [];
+        const f = FUNCTIONS.find(x=>x.id===fid);
+        // Function header
+        html += `<tr style="background:var(--bg-card-hover)"><td colspan="7" style="font-weight:700;font-size:0.82rem;padding:0.5rem 0.6rem;color:var(--text-dim)"><span style="font-size:1rem;margin-right:0.3rem">${f?.icon||'👤'}</span>${f?.label||fid}</td></tr>`;
+        
+        fPeople.forEach(p => {
+            const assigned = getPersonAssignedHrs(p.id);
+            const gap = p.availHrsWeek - assigned;
+            const pctUsed = p.availHrsWeek > 0 ? Math.round(assigned / p.availHrsWeek * 100) : (assigned > 0 ? 999 : 0);
+            const over = assigned > p.availHrsWeek;
+            totalAvail += p.availHrsWeek;
+            totalAssigned += assigned;
+
+            html += `<tr>
+                <td style="font-weight:500;padding-left:1.5rem"><input type="text" value="${esc(p.name)}" style="border:none;background:transparent;font-weight:500;font-size:inherit;color:inherit;width:120px;padding:0.2rem 0" onchange="updatePersonName('${p.id}',this.value)"></td>
+                <td>
+                    <select style="padding:0.3rem 0.4rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:0.82rem" onchange="updatePersonFunc('${p.id}',this.value)">
+                        ${FUNCTIONS.map(f2 => '<option value="'+f2.id+'"'+(f2.id===p.funcId?' selected':'')+'>'+f2.icon+' '+f2.label+'</option>').join('')}
+                    </select>
+                </td>
+                <td style="text-align:center">
+                    <input type="number" min="0" max="40" step="0.5" class="scoring-input" style="width:58px" value="${p.availHrsWeek}" onchange="updatePersonAvail('${p.id}',this.value)">
+                </td>
+                <td style="text-align:center;font-weight:600;color:${over?'var(--error)':'var(--text-muted)'}">${assigned}h</td>
+                <td style="text-align:center;font-weight:700;color:${gap>=0?'var(--success)':'var(--error)'}">${gap>=0?'+':''}${gap}h</td>
+                <td>
+                    <div style="display:flex;align-items:center;gap:0.4rem">
+                        <div class="cap-bar-bg" style="flex:1;height:8px"><div class="cap-bar-fill ${over?'attente':'go'}" style="width:${Math.min(100,pctUsed)}%;height:100%;border-radius:4px"></div></div>
+                        <span style="font-size:0.75rem;font-weight:700;color:${over?'var(--error)':pctUsed>=80?'var(--accent)':'var(--success)'}; min-width:32px;text-align:right">${pctUsed}%</span>
+                    </div>
+                </td>
+                <td style="text-align:center"><button class="btn-remove" onclick="removePerson('${p.id}')" title="Supprimer">×</button></td>
+            </tr>`;
+        });
+    });
+
+    // Totals
+    const totalGap = totalAvail - totalAssigned;
+    html += `<tr style="border-top:2px solid var(--border);background:var(--bg-card-hover)">
+        <td style="font-weight:700" colspan="2">Total (${people.length} personnes)</td>
+        <td style="text-align:center;font-weight:700">${totalAvail}h</td>
+        <td style="text-align:center;font-weight:700">${totalAssigned}h</td>
+        <td style="text-align:center;font-weight:700;color:${totalGap>=0?'var(--success)':'var(--error)'}">${totalGap>=0?'+':''}${totalGap}h</td>
+        <td></td><td></td>
+    </tr>`;
+    html += '</tbody></table></div></div>';
+    document.getElementById('peopleTableWrap').innerHTML = html;
+
+    // Summary card
+    const utilPct = totalAvail > 0 ? Math.round(totalAssigned / totalAvail * 100) : 0;
+    const overloaded = people.filter(p => getPersonAssignedHrs(p.id) > p.availHrsWeek).length;
+    document.getElementById('peopleSummary').innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--primary)">${people.length}</div><div style="font-size:0.78rem;color:var(--text-dim)">Ressources</div></div>
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--success)">${totalAvail}h/sem</div><div style="font-size:0.78rem;color:var(--text-dim)">Disponible</div></div>
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">${totalAssigned}h/sem</div><div style="font-size:0.78rem;color:var(--text-dim)">Assigné</div></div>
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:${overloaded?'var(--error)':'var(--success)'}">${overloaded}</div><div style="font-size:0.78rem;color:var(--text-dim)">Surchargé(s)</div></div>
+        </div>
+        <div style="margin-top:0.75rem;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.7);border-radius:8px;font-size:0.78rem;color:var(--text-dim);font-style:italic">
+            🔄 Validé 1× par trimestre par les gestionnaires. Le « dispo h/sem » représente le temps que cette personne peut consacrer aux projets (hors opérations courantes).
+        </div>`;
+}
+
+function addPerson() {
+    const id = 'r' + Date.now();
+    STATE.people.push({ id, name:'Nouvelle ressource', funcId:'gestionnaires', availHrsWeek:4 });
+    saveState(); renderPeople(); renderAssign();
+}
+function removePerson(pid) {
+    if (!confirm('Supprimer cette ressource?')) return;
+    STATE.people = STATE.people.filter(p => p.id !== pid);
+    // Remove assignments
+    Object.keys(STATE.assignments).forEach(projId => { delete STATE.assignments[projId][pid]; });
+    saveState(); renderAll();
+}
+function updatePersonAvail(pid, val) {
+    const p = STATE.people.find(x=>x.id===pid);
+    if (p) p.availHrsWeek = parseFloat(val) || 0;
+    saveState(); renderPeople(); renderRecommend(); renderAnalysis();
+}
+function updatePersonFunc(pid, fid) {
+    const p = STATE.people.find(x=>x.id===pid);
+    if (p) p.funcId = fid;
+    saveState(); renderPeople();
+}
+function updatePersonName(pid, val) {
+    const p = STATE.people.find(x=>x.id===pid);
+    if (p) p.name = val.trim() || 'Sans nom';
+    saveState(); renderPeople(); renderAssign(); renderRecommend(); renderAnalysis();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ASSIGNMENT: Assign People to Projects
+// ═══════════════════════════════════════════════════════════════
+function renderAssign() {
+    const projs = sorted();
+    const people = STATE.people;
+    if (!projs.length) {
+        document.getElementById('assignTableWrap').innerHTML = '<div class="card" style="text-align:center;padding:2rem;color:var(--text-dim)">Aucun projet scoré. Complétez le scoring d\'abord.</div>';
+        return;
+    }
+
+    let html = '<div class="card" style="padding:0.75rem"><div style="overflow-x:auto"><table class="scoring-table" style="min-width:700px"><thead><tr>';
+    html += '<th style="text-align:left;min-width:180px;position:sticky;left:0;background:var(--bg-card);z-index:2">Projet</th>';
+    people.forEach(p => {
+        const f = FUNCTIONS.find(x=>x.id===p.funcId);
+        html += `<th style="text-align:center;min-width:55px" title="${esc(p.name)} — ${f?.label||''} (${p.availHrsWeek}h/sem dispo.)"><span style="font-size:0.72rem;display:block;font-weight:400;color:var(--text-dim)">${f?.icon||'👤'}</span><span style="font-size:0.7rem">${esc(p.name)}</span><div style="font-size:0.6rem;color:var(--text-dim);font-weight:400">${p.availHrsWeek}h</div></th>`;
+    });
+    html += '<th style="text-align:center;background:var(--primary-light);min-width:60px">Total h/s</th></tr></thead><tbody>';
+
+    projs.forEach((proj, i) => {
+        const assignments = STATE.assignments[proj.id] || {};
+        const totalH = people.reduce((s,p) => s + (assignments[p.id]||0), 0);
+        html += `<tr>
+            <td style="font-weight:500;position:sticky;left:0;background:var(--bg-card);z-index:1">
+                <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:rgba(66,153,225,0.12);color:var(--project-color);font-size:0.7rem;font-weight:700;margin-right:0.4rem">${i+1}</span>${esc(proj.name)}
+            </td>`;
+        people.forEach(p => {
+            const v = assignments[p.id] || 0;
+            const personTotal = getPersonAssignedHrs(p.id);
+            const wouldBeOver = (personTotal - v + (v||0)) > p.availHrsWeek;
+            html += `<td style="text-align:center"><input type="number" min="0" max="40" step="0.5" class="scoring-input" style="width:48px;${v > 0 && wouldBeOver ? 'border-color:var(--error)':''}" value="${v||''}" placeholder="—" onchange="updateAssignment('${proj.id}','${p.id}',this.value)"></td>`;
+        });
+        html += `<td style="text-align:center;font-weight:700;font-size:1rem;color:var(--accent)">${totalH || '—'}</td></tr>`;
+    });
+
+    // Person totals row
+    html += '<tr style="border-top:2px solid var(--border);background:var(--bg-card-hover)"><td style="font-weight:700;position:sticky;left:0;background:var(--bg-card-hover);z-index:1">Total assigné</td>';
+    let grandTotal = 0;
+    people.forEach(p => {
+        const assigned = getPersonAssignedHrs(p.id);
+        const over = assigned > p.availHrsWeek;
+        grandTotal += assigned;
+        html += `<td style="text-align:center;font-weight:700;color:${over?'var(--error)':'var(--success)'}"><div>${assigned}h</div><div style="font-size:0.6rem;font-weight:400;color:var(--text-dim)">/${p.availHrsWeek}h</div></td>`;
+    });
+    html += `<td style="text-align:center;font-weight:700;font-size:1.05rem;color:var(--accent)">${grandTotal}h/s</td></tr>`;
+    html += '</tbody></table></div></div>';
+
+    // Hint
+    html += `<div style="margin-top:0.75rem;padding:0.6rem 1rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:0.82rem;color:#0369a1">
+        💡 Assignez les heures/semaine de chaque personne par projet. Les cellules en rouge indiquent un dépassement de la disponibilité. Consultez l'onglet <b>Recommandation</b> pour voir quels projets sont faisables.
+    </div>`;
+
+    document.getElementById('assignTableWrap').innerHTML = html;
+}
+
+function updateAssignment(projId, personId, val) {
+    if (!STATE.assignments[projId]) STATE.assignments[projId] = {};
+    const v = parseFloat(val) || 0;
+    if (v > 0) STATE.assignments[projId][personId] = v;
+    else delete STATE.assignments[projId][personId];
+    // Sync legacy resources field
+    const p = STATE.projects.find(x=>x.id===projId);
+    if (p) p.resources = getProjectTotalHrs(projId);
+    saveState();
+    renderAssign();
+    renderPeople();
+    renderRecommend();
+    renderAnalysis();
+    renderGate0();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RECOMMENDATION: GO / GOULOT Summary
+// ═══════════════════════════════════════════════════════════════
+function getCapacityResults() {
+    const projs = sorted();
+    const people = STATE.people;
+    // Track cumulative load per person as we stack projects
+    let cumLoad = {};
+    people.forEach(p => cumLoad[p.id] = 0);
+
+    const results = projs.map((proj, i) => {
+        const a = STATE.assignments[proj.id] || {};
+        const totalH = getProjectTotalHrs(proj.id);
+        let bottlenecks = [];
+        
+        // Check if adding this project causes any person to exceed capacity
+        people.forEach(p => {
+            const hrs = a[p.id] || 0;
+            if (hrs > 0) {
+                const newCum = cumLoad[p.id] + hrs;
+                if (newCum > p.availHrsWeek) {
+                    bottlenecks.push({ person: p, assigned: hrs, over: +(newCum - p.availHrsWeek).toFixed(1) });
+                }
+            }
+        });
+
+        const canFit = bottlenecks.length === 0;
+        // Update cumulative
+        people.forEach(p => cumLoad[p.id] += (a[p.id]||0));
+
+        return { ...proj, totalH, canFit, bottlenecks, status: canFit ? 'GO' : 'GOULOT' };
+    });
+
+    return results;
+}
+
+function renderRecommend() {
+    const results = getCapacityResults();
+    const people = STATE.people;
+    const totalAvail = getTotalAvailableHrs();
+    const totalAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id), 0);
+    const goP = results.filter(r => r.canFit);
+    const blockP = results.filter(r => !r.canFit);
+    const overloaded = people.filter(p => getPersonAssignedHrs(p.id) > p.availHrsWeek).length;
+    const gap = totalAvail - totalAssigned;
+
+    // KPIs
+    document.getElementById('recommendKPIs').innerHTML = `
+        <div class="card" style="text-align:center;padding:1rem;border-color:rgba(56,161,105,0.3)">
+            <div style="font-size:1.75rem;font-weight:700;color:var(--success)">${goP.length}</div>
+            <div style="font-size:0.78rem;color:var(--text-dim)">Projets faisables</div>
+        </div>
+        <div class="card" style="text-align:center;padding:1rem;border-color:${blockP.length?'rgba(229,62,62,0.3)':'rgba(56,161,105,0.3)'}">
+            <div style="font-size:1.75rem;font-weight:700;color:${blockP.length?'var(--error)':'var(--success)'}">${blockP.length}</div>
+            <div style="font-size:0.78rem;color:var(--text-dim)">Projets bloqués</div>
+        </div>
+        <div class="card" style="text-align:center;padding:1rem;border-color:rgba(198,160,82,0.3)">
+            <div style="font-size:1.75rem;font-weight:700;color:${gap>=0?'var(--success)':'var(--error)'}">${gap>=0?'+':''}${gap}h/s</div>
+            <div style="font-size:0.78rem;color:var(--text-dim)">${gap>=0?'Surplus':'Déficit'} global</div>
+        </div>
+        <div class="card" style="text-align:center;padding:1rem;border-color:${overloaded?'rgba(229,62,62,0.3)':'rgba(56,161,105,0.3)'}">
+            <div style="font-size:1.75rem;font-weight:700;color:${overloaded?'var(--error)':'var(--success)'}">${overloaded}</div>
+            <div style="font-size:0.78rem;color:var(--text-dim)">Personnes surchargées</div>
+        </div>`;
+
+    // Project list with GO/GOULOT
+    let content = '';
+    results.forEach((r, i) => {
+        const statusBadge = r.canFit 
+            ? '<span class="badge badge-go">FAISABLE</span>' 
+            : '<span class="badge badge-attente">GOULOT</span>';
+        
+        content += `<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.75rem 0.85rem;margin-bottom:0.45rem;background:${r.canFit?'rgba(56,161,105,0.04)':'rgba(229,62,62,0.04)'};border-radius:10px;border:1px solid ${r.canFit?'rgba(56,161,105,0.15)':'rgba(229,62,62,0.15)'}">
+            <span style="width:24px;height:24px;border-radius:7px;background:${r.canFit?'var(--success-bg)':'var(--error-bg)'};color:${r.canFit?'var(--success)':'var(--error)'};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;margin-top:0.1rem">${i+1}</span>
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
+                    <div style="font-size:0.92rem;font-weight:600;color:${r.canFit?'var(--text)':'var(--error)'}">${esc(r.name)}</div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0">
+                        <span style="font-size:0.82rem;font-weight:600;color:var(--text-dim)">${r.totalH}h/sem</span>
+                        <span style="font-size:0.78rem;color:var(--text-dim)">${pct(r.scores)}%</span>
+                        ${statusBadge}
+                    </div>
+                </div>`;
+        
+        if (r.bottlenecks.length) {
+            content += '<div style="margin-top:0.35rem;display:flex;flex-wrap:wrap;gap:0.3rem">';
+            r.bottlenecks.forEach(b => {
+                content += `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.55rem;background:var(--error-bg);border-radius:6px;font-size:0.72rem;color:var(--error);font-weight:500">
+                    ${funcIcon(b.person.funcId)} ${esc(b.person.name)} <span style="font-weight:700">+${b.over}h</span>
+                </span>`;
+            });
+            content += '</div>';
+        }
+
+        // Show assigned people for GO projects too
+        if (r.canFit) {
+            const a = STATE.assignments[r.id] || {};
+            const assignedPeople = people.filter(p => a[p.id] > 0);
+            if (assignedPeople.length) {
+                content += '<div style="margin-top:0.3rem;display:flex;flex-wrap:wrap;gap:0.25rem">';
+                assignedPeople.forEach(p => {
+                    content += `<span style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.45rem;background:var(--success-bg);border-radius:5px;font-size:0.68rem;color:var(--success)">${funcIcon(p.funcId)} ${esc(p.name)} ${a[p.id]}h</span>`;
+                });
+                content += '</div>';
+            }
+        }
+
+        content += '</div></div>';
+    });
+    document.getElementById('recommendContent').innerHTML = content;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANALYSIS: Detailed Per-Person Capacity
+// ═══════════════════════════════════════════════════════════════
+function renderAnalysis() {
+    const projs = sorted();
+    const people = STATE.people;
+    
+    // Group people by function
+    const grouped = {};
+    people.forEach(p => {
+        if (!grouped[p.funcId]) grouped[p.funcId] = [];
+        grouped[p.funcId].push(p);
+    });
+
+    let html = '';
+
+    // Per-function sections
+    FUNCTIONS.forEach(f => {
+        const fPeople = grouped[f.id];
+        if (!fPeople || !fPeople.length) return;
+
+        const funcAvail = fPeople.reduce((s,p) => s + p.availHrsWeek, 0);
+        const funcAssigned = fPeople.reduce((s,p) => s + getPersonAssignedHrs(p.id), 0);
+        const funcPct = funcAvail > 0 ? Math.round(funcAssigned / funcAvail * 100) : 0;
+        const funcOver = funcAssigned > funcAvail;
+
+        html += `<div class="card" style="margin-bottom:0.85rem">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+                <div style="display:flex;align-items:center;gap:0.4rem">
+                    <span style="font-size:1.15rem">${f.icon}</span>
+                    <span style="font-size:0.95rem;font-weight:700">${f.label}</span>
+                    <span style="font-size:0.78rem;color:var(--text-dim)">(${fPeople.length} pers.)</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                    <span style="font-size:0.82rem;color:var(--text-dim)">${funcAssigned}h / ${funcAvail}h</span>
+                    <span style="font-size:0.88rem;font-weight:700;color:${funcOver?'var(--error)':funcPct>=80?'var(--accent)':'var(--success)'}">${funcPct}%</span>
+                </div>
+            </div>`;
+
+        fPeople.forEach(p => {
+            const assigned = getPersonAssignedHrs(p.id);
+            const gap = p.availHrsWeek - assigned;
+            const pctUsed = p.availHrsWeek > 0 ? Math.round(assigned / p.availHrsWeek * 100) : (assigned > 0 ? 999 : 0);
+            const over = assigned > p.availHrsWeek;
+
+            html += `<div style="margin-bottom:0.65rem;padding:0.6rem 0.75rem;background:${over?'rgba(229,62,62,0.03)':'var(--bg-card-hover)'};border-radius:8px;border:1px solid ${over?'rgba(229,62,62,0.15)':'transparent'}">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
+                    <div style="font-size:0.88rem;font-weight:600">${esc(p.name)}</div>
+                    <div style="display:flex;align-items:center;gap:0.5rem">
+                        <span style="font-size:0.78rem;color:var(--text-dim)">${assigned}h / ${p.availHrsWeek}h</span>
+                        <span style="font-size:0.82rem;font-weight:700;color:${over?'var(--error)':pctUsed>=80?'var(--accent)':'var(--success)'}">${pctUsed}%</span>
+                        <span style="font-size:0.82rem;font-weight:700;color:${gap>=0?'var(--success)':'var(--error)'}">${gap>=0?'+':''}${gap}h</span>
+                    </div>
+                </div>
+                <div class="cap-bar-bg" style="height:8px;margin-bottom:0.35rem"><div class="cap-bar-fill ${over?'attente':'go'}" style="width:${Math.min(100,pctUsed)}%;height:100%;border-radius:4px"></div></div>`;
+
+            // Show which projects this person is assigned to
+            const projList = projs.filter(proj => (STATE.assignments[proj.id]?.[p.id]||0) > 0);
+            if (projList.length) {
+                html += '<div style="display:flex;flex-wrap:wrap;gap:0.25rem">';
+                projList.forEach(proj => {
+                    const hrs = STATE.assignments[proj.id][p.id];
+                    html += `<span style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.45rem;background:rgba(66,153,225,0.08);border-radius:5px;font-size:0.7rem;color:var(--project-color);font-weight:500">${esc(proj.name)} <span style="font-weight:700">${hrs}h</span></span>`;
+                });
+                html += '</div>';
+            } else {
+                html += '<div style="font-size:0.72rem;color:var(--text-dim);font-style:italic">Aucun projet assigné</div>';
+            }
+
+            html += '</div>';
+        });
+
+        html += '</div>';
+    });
+
+    if (!html) {
+        html = '<div class="card" style="text-align:center;padding:2rem;color:var(--text-dim)">Aucune ressource définie. Ajoutez des ressources dans l\'onglet Ressources.</div>';
+    }
+
+    document.getElementById('analysisContent').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// GATE 0
+// ═══════════════════════════════════════════════════════════════
+function renderGate0() {
+    const results = getCapacityResults();
+    const np = nonProj();
+    const totalAvail = getTotalAvailableHrs();
+    const goP = results.filter(r => r.canFit);
+    const blockP = results.filter(r => !r.canFit);
+
+    let html = `<div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;color:#ffffff">
+        <h3 style="font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:#ffffff">Sommaire exécutif</h3>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.85rem">
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700">${results.length}</div><div style="font-size:0.75rem;opacity:.8">Projets évalués</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#68d391">${goP.length}</div><div style="font-size:0.75rem;opacity:.8">Projets FAISABLES</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#fc8181">${blockP.length}</div><div style="font-size:0.75rem;opacity:.8">Projets GOULOT</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700">${totalAvail}h/s</div><div style="font-size:0.75rem;opacity:.8">Capacité / sem</div></div>
+        </div></div>`;
+
+    // GO table
+    html += '<h3 style="font-size:0.95rem;font-weight:600;color:var(--success);margin-bottom:0.6rem">✓ Projets recommandés (FAISABLES)</h3><div style="overflow-x:auto;margin-bottom:1.25rem"><table class="gate-table"><thead class="gate-table-go"><tr><th>#</th><th>Projet</th><th>Chef</th>';
+    CRITERIA.forEach(c => html += '<th>'+c.short+'</th>');
+    html += '<th>Pondéré</th><th>%</th><th>h/sem</th><th>Statut</th></tr></thead><tbody>';
+    goP.forEach((p,i) => {
+        html += `<tr style="background:${i%2===0?'var(--bg-card)':'var(--bg-card-hover)'}"><td>${i+1}</td><td>${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)}</td>`;
+        CRITERIA.forEach(c => html += '<td>'+(p.scores?.[c.id]||'—')+'</td>');
+        html += `<td style="font-weight:700">${weightedScore(p.scores).toFixed(1)}</td><td>${pct(p.scores)}%</td><td>${p.totalH}h</td><td><span class="badge badge-go">GO</span></td></tr>`;
+    });
+    html += '</tbody></table></div>';
+
+    // GOULOT table
+    if (blockP.length) {
+        html += '<h3 style="font-size:0.95rem;font-weight:600;color:var(--error);margin-bottom:0.6rem">⏸ Projets bloqués (GOULOTS)</h3><div style="overflow-x:auto;margin-bottom:1.25rem"><table class="gate-table"><thead class="gate-table-attente"><tr><th>#</th><th>Projet</th><th>Chef</th><th>Score %</th><th>h/sem</th><th>Goulots (personnes)</th></tr></thead><tbody>';
+        blockP.forEach((p,i) => {
+            const bNames = p.bottlenecks.map(b => b.person.name + ' (+' + b.over + 'h)').join(', ');
+            html += `<tr style="background:${i%2===0?'var(--bg-card)':'var(--bg-card-hover)'}"><td>${goP.length+i+1}</td><td>${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)}</td><td>${pct(p.scores)}%</td><td>${p.totalH}h</td><td style="color:var(--error);font-size:0.78rem">${bNames}</td></tr>`;
+        });
+        html += '</tbody></table></div>';
+    }
+
+    // Non-project
+    if (np.length) {
+        html += '<h3 style="font-size:0.95rem;font-weight:600;color:var(--text-dim);margin-bottom:0.6rem">Initiatives routées (non-projet)</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.6rem;margin-bottom:1.25rem">';
+        np.forEach(p => { const b=BRANCHES[p.branch]; html += `<div class="branch-card" style="background:${b?.bg};text-align:left;padding:0.85rem"><span style="font-size:1.15rem">${b?.icon}</span><div style="font-size:0.85rem;font-weight:500;margin-top:0.2rem">${esc(p.name)}</div><div style="font-size:0.72rem;color:${b?.color};font-weight:600;margin-top:0.2rem">${b?.label}</div></div>`; });
+        html += '</div>';
+    }
+
+    html += `<div style="margin-top:1.5rem;background:var(--bg-card-hover);border-radius:12px;padding:1rem;border:1px dashed var(--border);text-align:center">
+        <p style="margin:0;font-size:0.85rem;color:var(--text-dim)">📌 Après approbation Gate 0 → <b style="color:var(--text-muted)">Microsoft Teams Planner</b> (Chantal) → Gate 1 → Exécution → Gate 2 → Bénéfices → Gate 3</p>
+    </div>`;
+    document.getElementById('gate0Content').innerHTML = html;
+}
+
+function copyGate0Report() {
+    const results = getCapacityResults();
+    const np=nonProj();
+    const totalAvail = getTotalAvailableHrs();
+    const goP=results.filter(r=>r.canFit); const blockP=results.filter(r=>!r.canFit);
+    const lines = ['═══════════════════════════════════════','RAPPORT DE RECOMMANDATION — GATE 0','CAMIONS BL — PMO & Innovation','Date: '+new Date().toLocaleDateString('fr-CA'),'═══════════════════════════════════════','',
+        'CAPACITÉ: '+totalAvail+'h/sem | PROJETS: '+results.length+' | GO: '+goP.length+' | GOULOT: '+blockP.length,'',
+        '─── PROJETS GO ───',...goP.map((p,i)=>(i+1)+'. '+p.name+' | '+pct(p.scores)+'% | '+p.totalH+'h/s | Chef:'+p.chef),'',
+        '─── PROJETS GOULOT ───',...blockP.map((p,i)=>(i+1)+'. '+p.name+' | '+pct(p.scores)+'% | '+p.totalH+'h/s | Goulots: '+p.bottlenecks.map(b=>b.person.name+' (+'+b.over+'h)').join(', ')),'',
+        '─── NON-PROJET ───',...np.map(p=>'• '+p.name+' → '+(BRANCHES[p.branch]?.label||p.branch)),'',
+        '═══════════════════════════════════════','Préparé par: Sylvain PMO Consulting','═══════════════════════════════════════'];
+    navigator.clipboard?.writeText(lines.join('\n')).then(()=>notify('Rapport copié!'));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMPORT/EXPORT
+// ═══════════════════════════════════════════════════════════════
+function exportData() {
+    const d = JSON.stringify(STATE, null, 2);
+    const b = new Blob([d], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(b);
+    a.download = 'camionsbl_pmo_'+new Date().toISOString().split('T')[0]+'.json'; a.click();
+    notify('Données exportées');
+}
+function importData(e) {
+    const f = e.target.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+        try { const d = JSON.parse(ev.target.result);
+            if(d.projects) { STATE.projects=d.projects; STATE.maxCapacity=d.maxCapacity||70; STATE.weights=d.weights||{...DEFAULT_WEIGHTS}; STATE.people=d.people||JSON.parse(JSON.stringify(DEFAULT_PEOPLE)); STATE.assignments=d.assignments||JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS)); saveState(); renderAll(); notify('Données importées'); }
+            else alert('Format invalide');
+        } catch(err) { alert('Erreur: '+err.message); }
+    };
+    r.readAsText(f);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
