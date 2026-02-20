@@ -1,6 +1,9 @@
 {
-  "name": "camionsbl-pmo",
-  "version": "3.0.0",
-  "description": "Camions BL — PMO & Innovation Dashboard",
-  "private": true
+  "name": "pmo-camionsbl",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.9.0"
+  }
 }

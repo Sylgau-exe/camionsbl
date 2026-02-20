@@ -316,6 +316,52 @@
 </head>
 <body>
 
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="loginScreen" style="position:fixed;inset:0;background:linear-gradient(135deg,#1a365d 0%,#2d3748 100%);z-index:99999;display:flex;align-items:center;justify-content:center;padding:1rem">
+    <div style="display:flex;gap:2rem;align-items:stretch;max-width:850px;width:100%;flex-wrap:wrap;justify-content:center">
+        
+        <!-- MARCUS Introduction -->
+        <div style="flex:1;min-width:280px;max-width:380px;background:linear-gradient(135deg,#8b5cf6,#6366f1);border-radius:16px;padding:2rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:white">
+            <div style="width:120px;height:120px;border-radius:50%;border:4px solid rgba(255,255,255,0.3);overflow:hidden;margin-bottom:1.5rem;box-shadow:0 10px 30px rgba(0,0,0,0.3)">
+                <img id="loginMarcusAvatar" style="width:100%;height:100%;object-fit:cover" alt="MARCUS">
+            </div>
+            <h2 style="font-family:'Fraunces',serif;font-size:1.6rem;margin:0 0 0.5rem;font-weight:700">Bonjour, je suis MARCUS</h2>
+            <p style="font-size:0.95rem;opacity:0.9;margin:0 0 1rem;line-height:1.5">Votre assistant PMO intelligent</p>
+            <div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:1rem;font-size:0.85rem;line-height:1.6">
+                <p style="margin:0 0 0.75rem">Je suis ici pour vous aider à:</p>
+                <div style="text-align:left;display:inline-block">
+                    <div style="margin:0.4rem 0">✓ Prioriser vos projets</div>
+                    <div style="margin:0.4rem 0">✓ Gérer la capacité des équipes</div>
+                    <div style="margin:0.4rem 0">✓ Résoudre les goulots</div>
+                    <div style="margin:0.4rem 0">✓ Préparer vos décisions Gate 0</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Login Form -->
+        <div style="flex:1;min-width:280px;max-width:380px;background:white;border-radius:16px;padding:2.5rem;box-shadow:0 25px 50px rgba(0,0,0,0.3)">
+            <div style="text-align:center;margin-bottom:2rem">
+                <div style="font-size:3rem;margin-bottom:0.5rem">🏗️</div>
+                <h1 style="font-family:'Fraunces',serif;font-size:1.5rem;color:#1a365d;margin:0">Processus PMO</h1>
+                <p style="color:#718096;font-size:0.85rem;margin:0.5rem 0 0">Camions BL — Pré-Gate 0</p>
+            </div>
+            <div id="loginError" style="display:none;background:#fed7d7;color:#c53030;padding:0.75rem;border-radius:8px;margin-bottom:1rem;font-size:0.85rem;text-align:center"></div>
+            <div style="margin-bottom:1rem">
+                <label style="display:block;font-size:0.8rem;font-weight:600;color:#4a5568;margin-bottom:0.4rem">Identifiant</label>
+                <input type="text" id="loginUser" style="width:100%;padding:0.75rem;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box" placeholder="Entrez votre identifiant" onkeypress="if(event.key==='Enter')doLogin()">
+            </div>
+            <div style="margin-bottom:1.5rem">
+                <label style="display:block;font-size:0.8rem;font-weight:600;color:#4a5568;margin-bottom:0.4rem">Mot de passe</label>
+                <input type="password" id="loginPass" style="width:100%;padding:0.75rem;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box" placeholder="Entrez votre mot de passe" onkeypress="if(event.key==='Enter')doLogin()">
+            </div>
+            <button onclick="doLogin()" style="width:100%;padding:0.85rem;background:linear-gradient(135deg,#3182ce,#2b6cb0);color:white;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:transform 0.2s" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                Se connecter
+            </button>
+            <p style="text-align:center;margin:1.5rem 0 0;font-size:0.75rem;color:#a0aec0">© 2026 Sylvain PMO Consulting</p>
+        </div>
+    </div>
+</div>
+
 <!-- ═══ HEADER ═══ -->
 <header class="app-header">
     <div class="app-header-left">
@@ -327,8 +373,16 @@
     </div>
     <div class="app-header-right">
         <span class="header-badge" id="headerStats">—</span>
+        <select id="dealerFilter" class="header-btn" style="padding:0.4rem 0.6rem;font-size:0.8rem;cursor:pointer;background:white" onchange="filterDealer=this.value;renderAll()">
+            <option value="all">🏭 Tous les concessionnaires</option>
+            <option value="global">🌐 Global</option>
+            <option value="granby">🏭 Granby</option>
+            <option value="victoriaville">🏭 Victoriaville</option>
+            <option value="drummondville">🏭 Drummondville</option>
+        </select>
         <button class="header-btn" onclick="exportData()">💾 Exporter</button>
         <label class="header-btn" style="cursor:pointer">📂 Importer<input type="file" accept=".json" style="display:none" onchange="importData(event)"></label>
+        <button class="header-btn" onclick="doLogout()" style="background:#fef2f2;color:#c53030;border:1px solid #fecaca">🚪 Déconnexion</button>
     </div>
 </header>
 
@@ -367,7 +421,68 @@
 <!-- ─── TRIAGE PAGE ─── -->
 <div class="page" id="page-triage">
     <h2 style="font-family:'Fraunces',serif;font-size:1.25rem;margin-bottom:1rem">🎯 Triage des idées & opportunités</h2>
-    <div style="max-width:660px;margin:0 auto">
+    <div style="max-width:700px;margin:0 auto">
+        
+        <!-- Decision Criteria Reference -->
+        <div style="margin-bottom:1.25rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:1.25rem">
+            <div style="font-size:0.9rem;font-weight:700;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem">
+                <span style="font-size:1.1rem">📋</span> Critères de décision
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem">
+                <!-- PROJET -->
+                <div style="background:rgba(66,153,225,0.08);border:1px solid rgba(66,153,225,0.2);border-radius:10px;padding:0.85rem">
+                    <div style="font-size:0.85rem;font-weight:700;color:var(--project-color);margin-bottom:0.5rem">📋 PROJET</div>
+                    <div style="font-size:0.72rem;color:var(--text);line-height:1.6">
+                        <div>✓ Ressources multi-départements</div>
+                        <div>✓ Nouvelle capacité à créer</div>
+                        <div>✓ Ressources externes requises</div>
+                        <div>✓ Budget dédié hors opérations</div>
+                        <div>✓ Durée > 90 jours</div>
+                        <div>✓ Impact stratégique si échec</div>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.68rem;color:var(--primary);font-weight:600">→ Charte → Scoring → Gate 0</div>
+                </div>
+                
+                <!-- AMÉLIORATION CONTINUE -->
+                <div style="background:rgba(56,161,105,0.08);border:1px solid rgba(56,161,105,0.2);border-radius:10px;padding:0.85rem">
+                    <div style="font-size:0.85rem;font-weight:700;color:var(--improvement-color);margin-bottom:0.5rem">🔄 AMÉLIORATION CONTINUE</div>
+                    <div style="font-size:0.72rem;color:var(--text);line-height:1.6">
+                        <div>✓ Processus existant à améliorer</div>
+                        <div>✓ Pas de changement de système majeur</div>
+                        <div>✓ Équipe actuelle impliquée</div>
+                        <div>✗ Pas multi-départemental</div>
+                        <div>✗ Pas de ressources externes</div>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.68rem;color:var(--success);font-weight:600">→ Gabarit DMAIC</div>
+                </div>
+                
+                <!-- BILLET TI -->
+                <div style="background:rgba(128,90,213,0.08);border:1px solid rgba(128,90,213,0.2);border-radius:10px;padding:0.85rem">
+                    <div style="font-size:0.85rem;font-weight:700;color:var(--it-color);margin-bottom:0.5rem">🎫 BILLET TI</div>
+                    <div style="font-size:0.72rem;color:var(--text);line-height:1.6">
+                        <div>✓ Bogue ou problème technique</div>
+                        <div>✓ Demande d'accès ou équipement</div>
+                        <div>✓ Erreur système à corriger</div>
+                        <div>✓ Support technique requis</div>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.68rem;color:#805ad5;font-weight:600">→ Système de billets TI</div>
+                </div>
+                
+                <!-- OPÉRATIONS -->
+                <div style="background:rgba(221,107,32,0.08);border:1px solid rgba(221,107,32,0.2);border-radius:10px;padding:0.85rem">
+                    <div style="font-size:0.85rem;font-weight:700;color:var(--ops-color);margin-bottom:0.5rem">⚙️ OPÉRATIONS COURANTES</div>
+                    <div style="font-size:0.72rem;color:var(--text);line-height:1.6">
+                        <div>✓ Processus existant</div>
+                        <div>✓ Équipe actuelle peut le faire</div>
+                        <div>✓ Dans le travail régulier</div>
+                        <div>✗ Pas de ressources supplémentaires</div>
+                        <div>✗ Pas de budget dédié</div>
+                    </div>
+                    <div style="margin-top:0.5rem;font-size:0.68rem;color:#dd6b20;font-weight:600">→ Retour DMS / Huddle</div>
+                </div>
+            </div>
+        </div>
+        
         <div class="chat-area" id="chatArea"></div>
         <div class="chat-input" id="chatInput"></div>
         <div style="margin-top:0.6rem;display:flex;gap:0.4rem;justify-content:center" id="tierIndicator"></div>
@@ -493,7 +608,7 @@ const BRANCHES = {
     it_ticket: { icon:'🎫', label:'BILLET TI', color:'var(--it-color)', bg:'rgba(128,90,213,0.1)' },
     operations: { icon:'⚙️', label:'OPÉRATIONS', color:'var(--ops-color)', bg:'rgba(221,107,32,0.1)' },
 };
-const CRITERIA = [
+const DEFAULT_CRITERIA = [
     { id:'strategic_fit', label:'Fit stratégique', short:'Strat.', hint:'Alignement Roches & BHAG' },
     { id:'productivity', label:'Avantages productivité', short:'Prod.', hint:"Gains d'efficacité" },
     { id:'market', label:'Attrait marché', short:'Marché', hint:'Impact compétitivité/clients' },
@@ -517,34 +632,71 @@ const FUNCTIONS = [
     { id:'rh', label:'RH & Administration', dept:'Admin', icon:'🏢' },
     { id:'marketing', label:'Marketing', dept:'Admin', icon:'📣' },
 ];
+const DEALERS = [
+    { id:'global', label:'Global (toutes)', icon:'🌐' },
+    { id:'granby', label:'Granby', icon:'🏭' },
+    { id:'victoriaville', label:'Victoriaville', icon:'🏭' },
+    { id:'drummondville', label:'Drummondville', icon:'🏭' }
+];
+
+let filterDealer = 'all'; // 'all' = no filter
+
 const DEFAULT_AVAILABILITY = {};
 const DEFAULT_PROJECT_RESOURCES = {};
 
-// ── Named Resources Model ──
+// ── Monthly periods (Feb 2026 - Jan 2027) ──
+const MONTHS = ['2026-02','2026-03','2026-04','2026-05','2026-06','2026-07','2026-08','2026-09','2026-10','2026-11','2026-12','2027-01'];
+const MONTH_LABELS = { '2026-02':'Fév 26','2026-03':'Mar 26','2026-04':'Avr 26','2026-05':'Mai 26','2026-06':'Juin 26','2026-07':'Juil 26','2026-08':'Août 26','2026-09':'Sep 26','2026-10':'Oct 26','2026-11':'Nov 26','2026-12':'Déc 26','2027-01':'Jan 27' };
+const MONTH_SHORT = { '2026-02':'F','2026-03':'M','2026-04':'A','2026-05':'M','2026-06':'J','2026-07':'J','2026-08':'A','2026-09':'S','2026-10':'O','2026-11':'N','2026-12':'D','2027-01':'J' };
+
+function defaultAvailByMonth(baseHrs, summerReduction=true) {
+    const a = {};
+    MONTHS.forEach(m => {
+        // Reduce availability in July/August (vacations)
+        if (summerReduction && (m === '2026-07' || m === '2026-08')) {
+            a[m] = Math.round(baseHrs * 0.5);
+        } else if (summerReduction && m === '2026-12') {
+            a[m] = Math.round(baseHrs * 0.75); // Holidays
+        } else {
+            a[m] = baseHrs;
+        }
+    });
+    return a;
+}
+
+// ── Named Resources Model with Monthly Availability ──
 const DEFAULT_PEOPLE = [
-    { id:'r1', name:'Chantal', funcId:'gestionnaires', availHrsWeek:5 },
-    { id:'r2', name:'Gilbert', funcId:'ventes_neufs', availHrsWeek:8 },
-    { id:'r3', name:'Lemieux', funcId:'service_client', availHrsWeek:6 },
-    { id:'r4', name:'Robichaud', funcId:'ti', availHrsWeek:10 },
-    { id:'r5', name:'Tremblay', funcId:'mecaniciens', availHrsWeek:5 },
-    { id:'r6', name:'Coopers', funcId:'direction', availHrsWeek:4 },
-    { id:'r7', name:'Smith', funcId:'ti', availHrsWeek:12 },
-    { id:'r8', name:'Ouellette', funcId:'conseillers_tech', availHrsWeek:6 },
-    { id:'r9', name:'Samuel L.', funcId:'direction', availHrsWeek:3 },
-    { id:'r10', name:'Dupont', funcId:'finance', availHrsWeek:4 },
-    { id:'r11', name:'Martin', funcId:'pieces', availHrsWeek:5 },
-    { id:'r12', name:'Bergeron', funcId:'marketing', availHrsWeek:6 },
-    { id:'r13', name:'Lavoie', funcId:'rh', availHrsWeek:4 },
-    { id:'r14', name:'Gagnon', funcId:'mecaniciens', availHrsWeek:4 },
-    { id:'r15', name:'Roy', funcId:'ventes_usages', availHrsWeek:6 },
+    { id:'r1', name:'Chantal', funcId:'gestionnaires', availByMonth: defaultAvailByMonth(20) },
+    { id:'r2', name:'Gilbert', funcId:'ventes_neufs', availByMonth: defaultAvailByMonth(32) },
+    { id:'r3', name:'Lemieux', funcId:'service_client', availByMonth: defaultAvailByMonth(24) },
+    { id:'r4', name:'Robichaud', funcId:'ti', availByMonth: defaultAvailByMonth(40) },
+    { id:'r5', name:'Tremblay', funcId:'mecaniciens', availByMonth: defaultAvailByMonth(20) },
+    { id:'r6', name:'Coopers', funcId:'direction', availByMonth: defaultAvailByMonth(16) },
+    { id:'r7', name:'Smith', funcId:'ti', availByMonth: defaultAvailByMonth(48) },
+    { id:'r8', name:'Ouellette', funcId:'conseillers_tech', availByMonth: defaultAvailByMonth(24) },
+    { id:'r9', name:'Samuel L.', funcId:'direction', availByMonth: defaultAvailByMonth(12) },
+    { id:'r10', name:'Dupont', funcId:'finance', availByMonth: defaultAvailByMonth(16) },
+    { id:'r11', name:'Martin', funcId:'pieces', availByMonth: defaultAvailByMonth(20) },
+    { id:'r12', name:'Bergeron', funcId:'marketing', availByMonth: defaultAvailByMonth(24) },
+    { id:'r13', name:'Lavoie', funcId:'rh', availByMonth: defaultAvailByMonth(16) },
+    { id:'r14', name:'Gagnon', funcId:'mecaniciens', availByMonth: defaultAvailByMonth(16) },
+    { id:'r15', name:'Roy', funcId:'ventes_usages', availByMonth: defaultAvailByMonth(24) },
 ];
+
+function defaultAssignByMonth(baseHrs) {
+    const a = {};
+    MONTHS.forEach(m => a[m] = baseHrs);
+    return a;
+}
+
+// ── Assignments: { projectId: { personId: { month: hours } } } ──
 const DEFAULT_ASSIGNMENTS = {
-    p1: { r4:6, r2:4, r3:3, r1:2, r12:2 },
-    p2: { r3:5, r1:4, r5:3, r13:2 },
-    p3: { r7:8, r2:3, r3:2, r1:2 },
-    p4: { r5:5, r8:4, r11:2, r1:2 },
-    p5: { r6:4, r1:5, r3:3, r10:2 },
-    p6: { r7:6, r14:3, r8:2, r1:2 },
+    p1: { r4: defaultAssignByMonth(24), r2: defaultAssignByMonth(16), r3: defaultAssignByMonth(12), r1: defaultAssignByMonth(8), r12: defaultAssignByMonth(8) },
+    p2: { r3: defaultAssignByMonth(20), r1: defaultAssignByMonth(16), r5: defaultAssignByMonth(12), r13: defaultAssignByMonth(8) },
+    p3: { r7: defaultAssignByMonth(32), r2: defaultAssignByMonth(12), r3: defaultAssignByMonth(8), r1: defaultAssignByMonth(8) },
+    p4: { r5: defaultAssignByMonth(20), r8: defaultAssignByMonth(16), r11: defaultAssignByMonth(8), r1: defaultAssignByMonth(8) },
+    p5: { r6: defaultAssignByMonth(16), r1: defaultAssignByMonth(20), r3: defaultAssignByMonth(12), r10: defaultAssignByMonth(8) },
+    p6: { r7: defaultAssignByMonth(24), r14: defaultAssignByMonth(12), r8: defaultAssignByMonth(8), r1: defaultAssignByMonth(8) },
 };
 const SOURCES = [
     { v:'reunion_hebdo', l:'Réunion hebdomadaire', icon:'📅' },
@@ -581,35 +733,35 @@ const CHARTER_STEPS = [
 ];
 
 const DEFAULT_PROJECTS = [
-    { id:'p1', name:'Implantation CRM', chef:'Gilbert', source:'direction', branch:'project',
+    { id:'p1', name:'Implantation CRM', chef:'Gilbert', source:'direction', branch:'project', dealer:'global',
       charter:{ sponsor:'Samuel Lamoureux', type:'Software Development', priority:'High', overview:'Centraliser la gestion clients avec un CRM moderne intégré aux opérations de vente et service.', objectives:['Réduire le temps de traitement des leads de 40%','Centraliser 100% des données clients'], inScope:'Ventes + Service + Marketing', budget:'150 000$', benefits:'200 000$', duration:'1.5', benefitPeriod:'3', startDate:'2026-03-01', endDate:'2027-08-31',
         risks:[{risk:'Résistance au changement',impact:'High',mitigation:'Plan de formation dédié'},{risk:'Intégration DMS complexe',impact:'Medium',mitigation:'POC préalable'}],
         milestones:[{phase:'Analyse des besoins',duration:'2 mois',date:'Mai 2026'},{phase:'Configuration',duration:'4 mois',date:'Sep 2026'},{phase:'Formation & Go-live',duration:'3 mois',date:'Déc 2026'}],
         deliverables:['CRM configuré et intégré','Formation utilisateurs','Documentation processus'], stakeholders:[{name:'Samuel Lamoureux',role:'Sponsor'},{name:'Équipe ventes',role:'Utilisateurs'}] },
       scores:{strategic_fit:9,productivity:9,market:10,core_competency:10,feasibility:9,mission:9}, resources:20, triageDate:'2026-01-15' },
-    { id:'p2', name:'Programme Excellence Service', chef:'Lemieux', source:'reunion_mensuelle', branch:'project',
+    { id:'p2', name:'Programme Excellence Service', chef:'Lemieux', source:'reunion_mensuelle', branch:'project', dealer:'global',
       charter:{ sponsor:'Philippe Lamoureux', type:'Business Transformation', priority:'High', overview:'Standardiser la qualité du service à travers les 5 succursales.', objectives:['Atteindre certification Elite Support','Score satisfaction client > 4.5/5'], inScope:'Service + Formation', budget:'80 000$', benefits:'120 000$', duration:'1', benefitPeriod:'3',
         risks:[{risk:'Variabilité entre succursales',impact:'High',mitigation:'Standards uniformes'}], milestones:[{phase:'Diagnostic',duration:'2 mois',date:'Avr 2026'},{phase:'Déploiement',duration:'4 mois',date:'Août 2026'}] },
       scores:{strategic_fit:10,productivity:10,market:7,core_competency:7,feasibility:7,mission:7}, resources:20, triageDate:'2026-01-15' },
-    { id:'p3', name:'Portail client en ligne', chef:'Robichaud', source:'client', branch:'project',
+    { id:'p3', name:'Portail client en ligne', chef:'Robichaud', source:'client', branch:'project', dealer:'global',
       charter:{ sponsor:'Samuel Lamoureux', type:'Software Development', priority:'Medium', overview:'Self-service pour suivi de flottes et demandes de service.', objectives:['Réduire appels clients de 30%','Suivi en temps réel des véhicules en service'], inScope:'TI + Ventes + Service', budget:'120 000$', benefits:'160 000$', duration:'1.5', benefitPeriod:'3',
         risks:[{risk:'Adoption par les clients',impact:'Medium',mitigation:'UX testing avec clients pilotes'}], milestones:[{phase:'Design UX',duration:'3 mois',date:'Juin 2026'},{phase:'Développement',duration:'6 mois',date:'Déc 2026'}] },
       scores:{strategic_fit:8,productivity:7,market:7,core_competency:8,feasibility:9,mission:9}, resources:15, triageDate:'2026-01-20' },
-    { id:'p4', name:'Lean Service Optimization', chef:'Tremblay', source:'terrain', branch:'project',
+    { id:'p4', name:'Lean Service Optimization', chef:'Tremblay', source:'terrain', branch:'project', dealer:'granby',
       charter:{ sponsor:'Marc Ouellette', type:'Business Transformation', priority:'Medium', overview:"Réduire temps d'attente baies service par approche Lean.", objectives:["Réduire temps d'attente de 25%",'Augmenter throughput de 15%'], inScope:'Service + Pièces', budget:'45 000$', benefits:'80 000$', duration:'0.5', benefitPeriod:'3',
         risks:[{risk:'Perturbation des opérations durant le changement',impact:'Medium',mitigation:'Déploiement par succursale'}], milestones:[{phase:'Analyse Lean',duration:'1 mois',date:'Mars 2026'},{phase:'Implémentation',duration:'3 mois',date:'Juin 2026'}] },
       scores:{strategic_fit:7,productivity:7,market:9,core_competency:9,feasibility:8,mission:5}, resources:12, triageDate:'2026-01-22' },
-    { id:'p5', name:'Expansion Victoriaville', chef:'Coopers', source:'direction', branch:'project',
+    { id:'p5', name:'Expansion Victoriaville', chef:'Coopers', source:'direction', branch:'project', dealer:'victoriaville',
       charter:{ sponsor:'Samuel Lamoureux', type:'Construction', priority:'High', overview:'Croissance de 10K à 26K pi² pour capacité service accrue.', objectives:['Tripler la capacité de service','Ajouter 4 baies de service'], inScope:'Direction + Service + Admin', budget:'500 000$', benefits:'300 000$', duration:'2', benefitPeriod:'5',
         risks:[{risk:'Dépassement de coûts construction',impact:'High',mitigation:'Contrat prix fixe avec contingence 15%'}], milestones:[{phase:'Plans & permis',duration:'4 mois',date:'Juin 2026'},{phase:'Construction',duration:'8 mois',date:'Fév 2027'},{phase:'Aménagement',duration:'2 mois',date:'Avr 2027'}] },
       scores:{strategic_fit:7,productivity:7,market:6,core_competency:8,feasibility:8,mission:6}, resources:20, triageDate:'2026-01-10' },
-    { id:'p6', name:'App mobile techniciens', chef:'Smith', source:'terrain', branch:'project',
+    { id:'p6', name:'App mobile techniciens', chef:'Smith', source:'terrain', branch:'project', dealer:'global',
       charter:{ sponsor:'Marc Ouellette', type:'Software Development', priority:'Medium', overview:'Bons de travail digitaux pour les techniciens sur le terrain.', objectives:['Éliminer 100% des formulaires papier','Réduire temps admin de 30%'], inScope:'TI + Service', budget:'95 000$', benefits:'60 000$', duration:'1', benefitPeriod:'3',
         risks:[{risk:'Adoption par techniciens terrain',impact:'Medium',mitigation:'Champions par succursale + formation hands-on'}], milestones:[{phase:'Prototypage',duration:'2 mois',date:'Avr 2026'},{phase:'Développement',duration:'4 mois',date:'Août 2026'},{phase:'Pilote',duration:'2 mois',date:'Oct 2026'}] },
       scores:{strategic_fit:8,productivity:6,market:6,core_competency:7,feasibility:5,mission:5}, resources:20, triageDate:'2026-01-25' },
 ];
 
-let STATE = { projects: [], maxCapacity: 70, weights: {...DEFAULT_WEIGHTS}, people: JSON.parse(JSON.stringify(DEFAULT_PEOPLE)), assignments: JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS)) };
+let STATE = { projects: [], maxCapacity: 70, weights: {...DEFAULT_WEIGHTS}, criteria: JSON.parse(JSON.stringify(DEFAULT_CRITERIA)), people: JSON.parse(JSON.stringify(DEFAULT_PEOPLE)), assignments: JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS)) };
 let currentCharterProject = null;
 let charterStep = 1;
 
@@ -619,42 +771,182 @@ let triageState = { step:'desc', desc:'', src:'', ans:{}, tier:1, qi:0, result:n
 // ═══════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════
-function init() {
+let lastSyncTime = 0;
+let isSyncing = false;
+
+async function init() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) { 
-            const d = JSON.parse(raw); 
-            STATE.projects = d.projects || DEFAULT_PROJECTS; 
+        // Try to load from API first
+        const response = await fetch('/api/state');
+        if (response.ok) {
+            const d = await response.json();
+            STATE.projects = Array.isArray(d.projects) ? d.projects : DEFAULT_PROJECTS; 
             STATE.maxCapacity = d.maxCapacity || 70; 
-            STATE.weights = d.weights || {...DEFAULT_WEIGHTS}; 
-            STATE.people = d.people || JSON.parse(JSON.stringify(DEFAULT_PEOPLE));
+            STATE.weights = d.weights || {...DEFAULT_WEIGHTS};
+            STATE.criteria = d.criteria || JSON.parse(JSON.stringify(DEFAULT_CRITERIA));
+            STATE.people = Array.isArray(d.people) ? d.people : JSON.parse(JSON.stringify(DEFAULT_PEOPLE));
             STATE.assignments = d.assignments || JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS));
+            STATE.triageItems = d.triageItems || [];
+            lastSyncTime = Date.now();
+            console.log('✓ Données chargées depuis la base de données');
+        } else {
+            throw new Error('API not available');
         }
-        else { STATE.projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS)); }
-    } catch(e) { STATE.projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS)); }
+    } catch(e) { 
+        // Fallback to localStorage
+        console.log('⚠ Fallback vers localStorage:', e.message);
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) { 
+                const d = JSON.parse(raw); 
+                STATE.projects = Array.isArray(d.projects) ? d.projects : DEFAULT_PROJECTS; 
+                STATE.maxCapacity = d.maxCapacity || 70; 
+                STATE.weights = d.weights || {...DEFAULT_WEIGHTS};
+                STATE.criteria = d.criteria || JSON.parse(JSON.stringify(DEFAULT_CRITERIA));
+                STATE.people = Array.isArray(d.people) ? d.people : JSON.parse(JSON.stringify(DEFAULT_PEOPLE));
+                STATE.assignments = d.assignments || JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS));
+            }
+            else { STATE.projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS)); }
+        } catch(e2) { STATE.projects = JSON.parse(JSON.stringify(DEFAULT_PROJECTS)); }
+    }
     setupTabs();
     renderAll();
+    
+    // Start sync check every 10 seconds
+    setInterval(checkForUpdates, 10000);
 }
 
-function saveState() {
+async function saveState() {
+    // Always save to localStorage as backup
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(STATE)); } catch(e) {}
+    
+    // Save to API
+    if (isSyncing) return;
+    isSyncing = true;
+    
+    try {
+        const response = await fetch('/api/state', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-User-Name': localStorage.getItem('pmo_user_name') || 'Anonyme'
+            },
+            body: JSON.stringify({
+                projects: STATE.projects,
+                people: STATE.people,
+                assignments: STATE.assignments,
+                triageItems: STATE.triageItems || [],
+                criteriaWeights: STATE.weights,
+                maxCapacity: STATE.maxCapacity,
+                criteria: STATE.criteria
+            })
+        });
+        if (response.ok) {
+            lastSyncTime = Date.now();
+            showSyncStatus('saved');
+        }
+    } catch(e) {
+        console.log('Erreur sauvegarde API:', e.message);
+    }
+    isSyncing = false;
 }
 
-function getTotalAvailableHrs() {
-    return STATE.people.reduce((s,p) => s + (p.availHrsWeek||0), 0);
+async function checkForUpdates() {
+    if (isSyncing) return;
+    try {
+        const response = await fetch('/api/state');
+        if (response.ok) {
+            const d = await response.json();
+            const serverTime = new Date(d.updatedAt).getTime();
+            if (serverTime > lastSyncTime + 5000) { // 5 second buffer
+                // New data available!
+                STATE.projects = d.projects || [];
+                STATE.people = Array.isArray(d.people) ? d.people : JSON.parse(JSON.stringify(DEFAULT_PEOPLE));
+                STATE.assignments = d.assignments || {};
+                STATE.triageItems = d.triageItems || [];
+                lastSyncTime = Date.now();
+                renderAll();
+                showSyncStatus('updated', d.updatedBy);
+            }
+        }
+    } catch(e) {}
 }
-function getPersonAvailHrs(pid) {
+
+function showSyncStatus(type, userName) {
+    const existing = document.getElementById('syncToast');
+    if (existing) existing.remove();
+    
+    const toast = document.createElement('div');
+    toast.id = 'syncToast';
+    toast.style.cssText = 'position:fixed;bottom:20px;right:20px;padding:0.75rem 1.25rem;border-radius:10px;font-size:0.85rem;z-index:99999;animation:fadeIn 0.3s;box-shadow:0 4px 12px rgba(0,0,0,0.15)';
+    
+    if (type === 'saved') {
+        toast.style.background = '#38a169';
+        toast.style.color = 'white';
+        toast.innerHTML = '✓ Sauvegardé';
+    } else if (type === 'updated') {
+        toast.style.background = '#4299e1';
+        toast.style.color = 'white';
+        toast.innerHTML = '🔄 Mis à jour' + (userName ? ' par ' + userName : '');
+    }
+    
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
+let selectedMonth = MONTHS[0]; // Current selected month for UI
+
+function getTotalAvailableHrs(month) {
+    const m = month || selectedMonth;
+    return STATE.people.reduce((s,p) => s + (p.availByMonth?.[m] || 0), 0);
+}
+function getPersonAvailHrs(pid, month) {
+    const m = month || selectedMonth;
     const p = STATE.people.find(x=>x.id===pid);
-    return p ? (p.availHrsWeek||0) : 0;
+    return p ? (p.availByMonth?.[m] || 0) : 0;
 }
-function getPersonAssignedHrs(pid) {
+function getPersonAssignedHrs(pid, month) {
+    const m = month || selectedMonth;
     let total = 0;
-    Object.values(STATE.assignments).forEach(a => { total += (a[pid]||0); });
+    Object.values(STATE.assignments).forEach(projAssign => {
+        const personAssign = projAssign[pid];
+        if (personAssign) {
+            if (typeof personAssign === 'object') {
+                total += (personAssign[m] || 0);
+            } else {
+                total += personAssign; // Legacy format
+            }
+        }
+    });
     return total;
 }
-function getProjectTotalHrs(projId) {
+function getProjectTotalHrs(projId, month) {
+    const m = month || selectedMonth;
     const a = STATE.assignments[projId] || {};
-    return Object.values(a).reduce((s,v) => s + (v||0), 0);
+    let total = 0;
+    Object.values(a).forEach(personAssign => {
+        if (typeof personAssign === 'object') {
+            total += (personAssign[m] || 0);
+        } else {
+            total += personAssign; // Legacy format
+        }
+    });
+    return total;
+}
+function getPersonYearlyAvail(pid) {
+    const p = STATE.people.find(x=>x.id===pid);
+    if (!p || !p.availByMonth) return 0;
+    return MONTHS.reduce((s,m) => s + (p.availByMonth[m]||0), 0);
+}
+function getPersonYearlyAssigned(pid) {
+    let total = 0;
+    Object.values(STATE.assignments).forEach(projAssign => {
+        const personAssign = projAssign[pid];
+        if (personAssign && typeof personAssign === 'object') {
+            MONTHS.forEach(m => total += (personAssign[m] || 0));
+        }
+    });
+    return total;
 }
 function funcLabel(fid) {
     const f = FUNCTIONS.find(x=>x.id===fid);
@@ -683,6 +975,7 @@ function setupTabs() {
 function goTab(tabId) {
     document.querySelectorAll('.nav-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
     document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + tabId));
+    if (typeof currentTab !== 'undefined') currentTab = tabId;
     renderAll();
 }
 
@@ -694,7 +987,7 @@ const weightedScore = s => {
     if(!s) return 0;
     const w = STATE.weights;
     let total = 0;
-    CRITERIA.forEach(c => { total += (s[c.id]||0) * (w[c.id]||0) / 100; });
+    STATE.criteria.forEach(c => { total += (s[c.id]||0) * (w[c.id]||0) / 100; });
     return total;
 };
 const sum = s => s ? Object.values(s).reduce((a,b) => a + (b||0), 0) : 0;
@@ -702,20 +995,30 @@ const pct = s => ((weightedScore(s)/10)*100).toFixed(1);
 const esc = t => { if(!t)return''; const d=document.createElement('div'); d.textContent=t; return d.innerHTML; };
 const fmt = n => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
-function sorted() { return [...STATE.projects].filter(p=>p.branch==='project'&&p.scores).sort((a,b)=>weightedScore(b.scores)-weightedScore(a.scores)); }
-function nonProj() { return STATE.projects.filter(p=>p.branch&&p.branch!=='project'); }
-function allProj() { return STATE.projects.filter(p=>p.branch==='project'); }
+function matchesDealer(p) { if(filterDealer==='all') return true; return p.dealer===filterDealer; }
+function sorted() { return [...STATE.projects].filter(p=>p.branch==='project'&&p.scores&&matchesDealer(p)).sort((a,b)=>weightedScore(b.scores)-weightedScore(a.scores)); }
+function nonProj() { return STATE.projects.filter(p=>p.branch&&p.branch!=='project'&&matchesDealer(p)); }
+function allProj() { return STATE.projects.filter(p=>p.branch==='project'&&matchesDealer(p)); }
 
 function srcLabel(v) { const s = SOURCES.find(x=>x.v===v); return s ? s.l : v; }
+function dealerLabel(d) { const dl = DEALERS.find(x=>x.id===d); return dl ? dl.label : 'Non assigné'; }
+function dealerBadge(d) { if(!d) return ''; const dl = DEALERS.find(x=>x.id===d); if(!dl) return ''; const colors={global:'#6366f1',granby:'#2563eb',victoriaville:'#16a34a',drummondville:'#ea580c'}; return '<span style="font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:6px;background:'+(colors[d]||'#94a3b8')+'15;color:'+(colors[d]||'#94a3b8')+';font-weight:600;white-space:nowrap">'+dl.icon+' '+dl.label+'</span>'; }
 function scoreClass(v) { if(v>=8) return 'score-high'; if(v>=5) return 'score-mid'; return 'score-low'; }
 
 // ═══════════════════════════════════════════════════════════════
 // RENDER ALL
 // ═══════════════════════════════════════════════════════════════
 function renderAll() {
+    // Ensure STATE.people is an array
+    if (!Array.isArray(STATE.people)) {
+        STATE.people = JSON.parse(JSON.stringify(DEFAULT_PEOPLE));
+    }
     const sp = sorted();
-    const totalAvail = getTotalAvailableHrs();
-    document.getElementById('headerStats').textContent = sp.length + ' projets · ' + STATE.people.length + ' ressources · ' + totalAvail + 'h/sem dispo.';
+    const filteredProjects = allProj();
+    const totalProjects = STATE.projects.filter(p=>p.branch==='project').length;
+    const yearlyAvail = STATE.people.reduce((s,p) => s + getPersonYearlyAvail(p.id), 0);
+    const filterLabel = filterDealer==='all' ? '' : ' · Filtre: '+dealerLabel(filterDealer);
+    document.getElementById('headerStats').textContent = filteredProjects.length + (filterDealer!=='all'?'/'+totalProjects:'') + ' projets · ' + STATE.people.length + ' ressources · ' + yearlyAvail + 'h/an' + filterLabel;
     renderWorkflow();
     renderTriage();
     renderPortfolio();
@@ -787,13 +1090,13 @@ function renderWorkflow() {
     // ── Étape 5: Analyse de capacité + side input (Ressources dispo) ──
     html += `<div class="workflow-row">
         <div style="flex:1">`;
-    html += stepCard(5, '👥', 'Analyse de capacité', 'Résultats: demande vs capacité disponible par personne', 'var(--success)', 'Analyser', 'recommend');
+    html += stepCard(5, '👥', 'Analyse de capacité', 'Résultats: demande vs capacité sur 12 mois', 'var(--success)', 'Analyser', 'recommend');
     html += `</div>
         <div class="workflow-arrow-left">◀</div>
         <div class="workflow-side-input" onclick="goTab('people')" style="cursor:pointer" title="Cliquer pour configurer">
             <div class="side-input-freq">1 fois par quart — Chefs fonctionnels</div>
-            <div class="side-input-title">Ressources disponibles de l'organisation</div>
-            <div class="side-input-desc">Personnes nommées et leur disponibilité h/sem pour projets</div>
+            <div class="side-input-title">Ressources disponibles (12 mois)</div>
+            <div class="side-input-desc">Personnes nommées et disponibilité h/mois incl. vacances été</div>
             <div style="margin-top:0.4rem;font-size:0.72rem;font-weight:600;color:var(--primary-light)">✎ Cliquer pour configurer</div>
         </div>
     </div>`;
@@ -923,7 +1226,7 @@ function triageAns(a) {
 function triageFinish(bk) {
     const S = triageState; const b = BRANCHES[bk]; S.result = bk; S.step = 'done';
     triageAddMsg(b.icon + ' Verdict: ' + b.label, 'bot', true);
-    STATE.projects.push({ id:gid(), name:S.desc, chef:'', source:S.src, branch:bk, charter:{}, scores:bk==='project'?null:undefined, resources:0, triageDate:new Date().toISOString().split('T')[0] });
+    STATE.projects.push({ id:gid(), name:S.desc, chef:'', source:S.src, branch:bk, dealer:'', charter:{}, scores:bk==='project'?null:undefined, resources:0, triageDate:new Date().toISOString().split('T')[0] });
     saveState(); notify('"'+S.desc+'" ajouté au portefeuille'); renderTriage();
 }
 
@@ -943,9 +1246,9 @@ function renderPortfolio() {
             <div style="width:5px;height:40px;border-radius:3px;background:${p.scores?'var(--success)':'var(--border)'}"></div>
             <div style="flex:1">
                 <div style="font-weight:600;font-size:0.95rem">${esc(p.name)}</div>
-                <div style="display:flex;gap:0.75rem;margin-top:0.2rem;font-size:0.78rem;color:var(--text-dim)">
+                <div style="display:flex;gap:0.75rem;margin-top:0.2rem;font-size:0.78rem;color:var(--text-dim);align-items:center">
                     ${p.chef?'<span>Chef: '+esc(p.chef)+'</span>':''}
-                    <span>${srcLabel(p.source)}</span><span>${p.triageDate||''}</span>
+                    <span>${srcLabel(p.source)}</span>${dealerBadge(p.dealer)}<span>${p.triageDate||''}</span>
                 </div>
             </div>
             ${p.scores?'<span class="badge badge-scored">'+pct(p.scores)+'%</span>':'<span class="badge badge-unscored">Non scoré</span>'}
@@ -1028,9 +1331,14 @@ function renderCharterStep() {
                 <div class="form-group"><label class="form-label">Date fin cible</label><input type="date" class="form-control" id="c_endDate" value="${c.endDate||''}" onchange="charterAutoSave()"></div>
             </div>
             <div class="form-row">
+                <div class="form-group"><label class="form-label">Concessionnaire impacté</label>
+                    <select class="form-control" id="c_dealer" onchange="charterAutoSave()">
+                        <option value="">Sélectionner...</option>
+                        ${DEALERS.map(d=>'<option value="'+d.id+'"'+(p.dealer===d.id?' selected':'')+'>'+d.icon+' '+d.label+'</option>').join('')}
+                    </select></div>
                 <div class="form-group"><label class="form-label">Chef de projet</label><input class="form-control" id="c_chef" value="${esc(p.chef)}" onchange="charterAutoSave()"></div>
-                <div class="form-group"><label class="form-label">Ressources (jours-personne)</label><input type="number" class="form-control" id="c_resources" value="${p.resources||0}" min="0" onchange="charterAutoSave()"></div>
             </div>
+            <div class="form-group"><label class="form-label">Ressources (jours-personne)</label><input type="number" class="form-control" id="c_resources" value="${p.resources||0}" min="0" onchange="charterAutoSave()"></div>
         </div>`;
     } else if (sn === 2) {
         const objs = charterArr('objectives');
@@ -1180,6 +1488,7 @@ function charterAutoSave() {
         c.startDate = document.getElementById('c_startDate')?.value||'';
         c.endDate = document.getElementById('c_endDate')?.value||'';
         currentCharterProject.chef = document.getElementById('c_chef')?.value||'';
+        currentCharterProject.dealer = document.getElementById('c_dealer')?.value||'';
         currentCharterProject.resources = parseInt(document.getElementById('c_resources')?.value)||0;
     } else if (sn===2) {
         c.overview = document.getElementById('c_overview')?.value||'';
@@ -1253,28 +1562,28 @@ function buildCharterPreview() {
 function renderScoring() {
     const ap = [...allProj()].sort((a,b)=>weightedScore(b.scores||{})-weightedScore(a.scores||{}));
     const w = STATE.weights;
-    const totalW = CRITERIA.reduce((s,c)=>s+(w[c.id]||0),0);
+    const totalW = STATE.criteria.reduce((s,c)=>s+(w[c.id]||0),0);
     const warnW = totalW !== 100;
 
     let html = '<table class="scoring-table"><thead><tr><th>#</th><th>Projet</th><th>Chef</th>';
-    CRITERIA.forEach(c => html += `<th title="${c.hint}"><div>${c.short}</div><div style="font-size:0.65rem;font-weight:400;opacity:0.85;margin-top:2px">${w[c.id]||0}%</div></th>`);
+    STATE.criteria.forEach(c => html += `<th title="${c.hint}"><div>${c.short}</div><div style="font-size:0.65rem;font-weight:400;opacity:0.85;margin-top:2px">${w[c.id]||0}%</div></th>`);
     html += '<th style="background:var(--primary-light)"><div>Pondéré</div><div style="font-size:0.65rem;font-weight:400;opacity:0.85;margin-top:2px">/10</div></th><th>%</th><th>h/mois</th></tr></thead><tbody>';
     ap.forEach((p,i) => {
         const sc=p.scores||{}; const ws=weightedScore(sc); const pc=pct(sc); const pn=parseFloat(pc);
         html += `<tr><td style="text-align:center"><span style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:rgba(66,153,225,0.15);color:var(--project-color);font-size:0.75rem;font-weight:700">${i+1}</span></td>
-        <td style="font-weight:500">${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)||'—'}</td>`;
-        CRITERIA.forEach(c => {
+        <td style="font-weight:500">${esc(p.name)} ${dealerBadge(p.dealer)}</td><td style="color:var(--text-dim)">${esc(p.chef)||'—'}</td>`;
+        STATE.criteria.forEach(c => {
             html += `<td style="text-align:center"><input type="number" min="1" max="10" class="scoring-input ${sc[c.id]?scoreClass(sc[c.id]):''}" value="${sc[c.id]||''}" onchange="updateScore('${p.id}','${c.id}',this.value)"></td>`;
         });
         html += `<td style="text-align:center;font-weight:700;font-size:1.05rem;color:var(--accent)">${ws?ws.toFixed(1):'—'}</td>
         <td style="text-align:center"><span class="badge ${pn>=80?'badge-go':pn>=65?'badge-unscored':'badge-attente'}">${ws?pc+'%':'—'}</span></td>
-        <td style="text-align:center"><span style="font-size:0.85rem;color:var(--text-dim);cursor:pointer" title="Modifier dans l'onglet Affectation" onclick="goTab('assign')">${getProjectTotalHrs(p.id) || '—'}<span style="font-size:0.65rem">h/s</span></span></td></tr>`;
+        <td style="text-align:center"><span style="font-size:0.85rem;color:var(--text-dim);cursor:pointer" title="Modifier dans l'onglet Affectation" onclick="goTab('assign')">${MONTHS.reduce((s,m) => s + getProjectTotalHrs(p.id, m), 0) || '—'}<span style="font-size:0.65rem">h/an</span></span></td></tr>`;
     });
     html += '</tbody></table>';
 
     // Weight warning
     if (warnW) {
-        html += `<div style="margin-top:0.75rem;padding:0.6rem 1rem;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:0.82rem;color:#92400e">⚠️ Les poids totalisent <b>${totalW}%</b> au lieu de 100%. <button onclick="openWeightsEditor()" style="margin-left:0.5rem;background:var(--accent);color:white;border:none;padding:0.25rem 0.65rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600">Ajuster les poids</button></div>`;
+        html += `<div style="margin-top:0.75rem;padding:0.6rem 1rem;background:#fef3c7;border:1px solid #fbbf24;border-radius:8px;font-size:0.82rem;color:#92400e">⚠️ Les poids totalisent <b>${totalW}%</b> au lieu de 100%. <button onclick="openCriteriaEditor()" style="margin-left:0.5rem;background:var(--accent);color:white;border:none;padding:0.25rem 0.65rem;border-radius:6px;cursor:pointer;font-size:0.78rem;font-weight:600">Ajuster les poids</button></div>`;
     }
     document.getElementById('scoringTableWrap').innerHTML = html;
 
@@ -1293,13 +1602,13 @@ function renderScoring() {
         </div>
     </div>`;
 
-    // Criteria legend + edit weights button
+    // Criteria legend + edit button
     lhtml += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
         <div style="font-size:0.78rem;font-weight:600;color:var(--text-dim);text-transform:uppercase">Légende des critères</div>
-        <button onclick="openWeightsEditor()" class="btn" style="padding:0.3rem 0.75rem;font-size:0.78rem;background:#f0fdf4;color:var(--success);border:1px solid #bbf7d0">⚖️ Modifier les poids</button>
+        <button onclick="openCriteriaEditor()" class="btn" style="padding:0.3rem 0.75rem;font-size:0.78rem;background:#f0fdf4;color:var(--success);border:1px solid #bbf7d0">⚙️ Gérer critères & poids</button>
     </div>`;
     lhtml += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem">';
-    CRITERIA.forEach(c => lhtml += `<div style="font-size:0.78rem;color:var(--text-muted)"><b>${c.short}</b> (${w[c.id]||0}%) — ${c.label}<br><span style="color:var(--text-dim)">${c.hint}</span></div>`);
+    STATE.criteria.forEach(c => lhtml += `<div style="font-size:0.78rem;color:var(--text-muted)"><b>${c.short}</b> (${w[c.id]||0}%) — ${c.label}<br><span style="color:var(--text-dim)">${c.hint}</span></div>`);
     lhtml += '</div>';
     document.getElementById('criteriaLegend').innerHTML = lhtml;
 }
@@ -1313,107 +1622,198 @@ function updateScore(id, crit, val) {
 function updateRes(id, val) { const p = STATE.projects.find(x=>x.id===id); if(p) p.resources = parseInt(val)||0; saveState(); renderAll(); }
 
 // ═══════════════════════════════════════════════════════════════
-// WEIGHTS EDITOR
+// CRITERIA & WEIGHTS EDITOR (Combined)
 // ═══════════════════════════════════════════════════════════════
-function openWeightsEditor() {
-    const w = STATE.weights;
-    let html = `<div class="modal-overlay" id="weightsOverlay" onclick="if(event.target===this)closeWeights()">
-    <div class="modal-box" style="max-width:640px">
+function openCriteriaEditor() {
+    let html = `<div class="modal-overlay" id="criteriaOverlay" onclick="if(event.target===this)closeCriteria()">
+    <div class="modal-box" style="max-width:820px;max-height:90vh;overflow-y:auto">
         <div class="charter-modal-header">
             <div style="display:flex;align-items:center;gap:0.6rem">
-                <div class="charter-logo-icon">⚖️</div>
-                <span class="charter-modal-title">Poids des critères stratégiques</span>
+                <div class="charter-logo-icon">⚙️</div>
+                <span class="charter-modal-title">Critères de scoring & pondération</span>
             </div>
             <div style="display:flex;gap:0.5rem;align-items:center">
-                <button class="charter-btn-close" onclick="closeWeights()">✕ Fermer</button>
-                <button class="charter-btn-save" onclick="saveWeights()">💾 Appliquer</button>
+                <button class="charter-btn-close" onclick="closeCriteria()">✕ Fermer</button>
+                <button class="charter-btn-save" onclick="saveCriteria()">💾 Sauvegarder</button>
             </div>
         </div>
         <div style="padding:1.5rem">
-            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.25rem">Définissez l'importance relative de chaque critère pour le calcul du score pondéré.</p>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.25rem">Personnalisez les critères et leur importance relative pour le calcul du score pondéré.</p>
             <p style="font-size:0.78rem;color:var(--text-dim);margin-bottom:1.25rem;font-style:italic">🔄 Validé 1 fois par trimestre par le comité exécutif. Les poids doivent totaliser 100%.</p>
 
-            <table style="width:100%;border-collapse:collapse">
+            <table style="width:100%;border-collapse:collapse" id="criteriaTable">
             <thead><tr>
-                <th style="text-align:left;padding:0.6rem;font-size:0.78rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border)">Critère</th>
-                <th style="text-align:left;padding:0.6rem;font-size:0.78rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border)">Description</th>
-                <th style="text-align:center;padding:0.6rem;font-size:0.78rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);width:90px">Poids (%)</th>
+                <th style="text-align:center;padding:0.5rem;font-size:0.75rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);width:30px">#</th>
+                <th style="text-align:left;padding:0.5rem;font-size:0.75rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);width:80px">Abrév.</th>
+                <th style="text-align:left;padding:0.5rem;font-size:0.75rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border)">Nom complet</th>
+                <th style="text-align:left;padding:0.5rem;font-size:0.75rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border)">Description / Aide</th>
+                <th style="text-align:center;padding:0.5rem;font-size:0.75rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);width:75px">Poids %</th>
+                <th style="text-align:center;padding:0.5rem;font-size:0.75rem;font-weight:600;color:var(--text-dim);border-bottom:2px solid var(--border);width:45px"></th>
             </tr></thead>
-            <tbody>`;
+            <tbody id="criteriaRows">`;
 
-    CRITERIA.forEach(c => {
-        html += `<tr>
-            <td style="padding:0.7rem 0.6rem;border-bottom:1px solid var(--border);font-weight:600;font-size:0.9rem">${c.short}</td>
-            <td style="padding:0.7rem 0.6rem;border-bottom:1px solid var(--border)">
-                <div style="font-size:0.85rem;color:var(--text)">${c.label}</div>
-                <div style="font-size:0.75rem;color:var(--text-dim)">${c.hint}</div>
-            </td>
-            <td style="padding:0.7rem 0.6rem;border-bottom:1px solid var(--border);text-align:center">
-                <input type="number" min="0" max="100" id="w_${c.id}" value="${w[c.id]||0}" 
-                    style="width:65px;padding:0.45rem 0.3rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:1rem;font-weight:700;text-align:center"
-                    oninput="updateWeightTotal()">
-            </td>
-        </tr>`;
+    STATE.criteria.forEach((c, i) => {
+        html += renderCriteriaRow(c, i);
     });
 
     html += `</tbody>
             <tfoot><tr>
-                <td colspan="2" style="padding:0.7rem 0.6rem;font-weight:700;text-align:right;border-top:2px solid var(--border)">Total</td>
+                <td colspan="4" style="padding:0.7rem 0.6rem;font-weight:700;text-align:right;border-top:2px solid var(--border)">Total des poids</td>
                 <td style="padding:0.7rem 0.6rem;text-align:center;border-top:2px solid var(--border)">
-                    <span id="weightTotalDisplay" style="font-size:1.1rem;font-weight:700">100%</span>
+                    <span id="critWeightTotal" style="font-size:1.1rem;font-weight:700">100%</span>
                 </td>
+                <td style="border-top:2px solid var(--border)"></td>
             </tr></tfoot>
             </table>
 
-            <div style="margin-top:1rem;display:flex;gap:0.5rem">
-                <button onclick="resetWeightsEqual()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem">↺ Répartition égale</button>
-                <button onclick="resetWeightsDefault()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem">↺ Valeurs par défaut</button>
+            <div style="margin-top:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">
+                <button onclick="addCriterion()" class="btn" style="font-size:0.82rem;padding:0.4rem 0.85rem;background:var(--primary);color:white">+ Ajouter un critère</button>
+                <div style="border-left:1px solid var(--border);height:24px;margin:0 0.5rem"></div>
+                <button onclick="distributeWeightsEqual()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem">↺ Répartition égale</button>
+                <button onclick="resetCriteriaDefault()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.35rem 0.75rem">↺ Valeurs par défaut</button>
+            </div>
+
+            <div style="margin-top:1rem;padding:0.6rem 0.85rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:0.78rem;color:#0369a1">
+                💡 <b>Conseil:</b> Les critères les plus importants pour votre stratégie devraient avoir un poids plus élevé. Le total doit égaler 100%.
             </div>
         </div>
     </div></div>`;
 
     document.body.insertAdjacentHTML('beforeend', html);
-    updateWeightTotal();
+    updateCriteriaWeightTotal();
 }
 
-function updateWeightTotal() {
+function renderCriteriaRow(c, i) {
+    const w = STATE.weights[c.id] || 0;
+    return `<tr data-id="${c.id}">
+        <td style="text-align:center;padding:0.5rem;border-bottom:1px solid var(--border);font-weight:600;color:var(--text-dim)">${i+1}</td>
+        <td style="padding:0.5rem;border-bottom:1px solid var(--border)">
+            <input type="text" class="crit-short" value="${esc(c.short)}" maxlength="10" style="width:70px;padding:0.35rem;border-radius:6px;border:1px solid var(--border);font-size:0.85rem;font-weight:600">
+        </td>
+        <td style="padding:0.5rem;border-bottom:1px solid var(--border)">
+            <input type="text" class="crit-label" value="${esc(c.label)}" style="width:100%;padding:0.35rem;border-radius:6px;border:1px solid var(--border);font-size:0.85rem">
+        </td>
+        <td style="padding:0.5rem;border-bottom:1px solid var(--border)">
+            <input type="text" class="crit-hint" value="${esc(c.hint)}" style="width:100%;padding:0.35rem;border-radius:6px;border:1px solid var(--border);font-size:0.82rem;color:var(--text-muted)">
+        </td>
+        <td style="text-align:center;padding:0.5rem;border-bottom:1px solid var(--border)">
+            <input type="number" class="crit-weight" min="0" max="100" value="${w}" style="width:58px;padding:0.35rem;border-radius:6px;border:1px solid var(--border);font-size:0.9rem;font-weight:600;text-align:center" oninput="updateCriteriaWeightTotal()">
+        </td>
+        <td style="text-align:center;padding:0.5rem;border-bottom:1px solid var(--border)">
+            <button onclick="removeCriterion('${c.id}')" class="btn-remove" title="Supprimer" style="width:28px;height:28px">×</button>
+        </td>
+    </tr>`;
+}
+
+function updateCriteriaWeightTotal() {
     let total = 0;
-    CRITERIA.forEach(c => { total += parseInt(document.getElementById('w_'+c.id)?.value)||0; });
-    const el = document.getElementById('weightTotalDisplay');
-    if(el) {
+    document.querySelectorAll('#criteriaRows .crit-weight').forEach(input => {
+        total += parseInt(input.value) || 0;
+    });
+    const el = document.getElementById('critWeightTotal');
+    if (el) {
         el.textContent = total + '%';
         el.style.color = total === 100 ? 'var(--success)' : 'var(--error)';
     }
 }
 
-function resetWeightsEqual() {
-    const eq = Math.floor(100/CRITERIA.length);
-    const rem = 100 - eq*CRITERIA.length;
-    CRITERIA.forEach((c,i) => { document.getElementById('w_'+c.id).value = eq + (i<rem?1:0); });
-    updateWeightTotal();
-}
-function resetWeightsDefault() {
-    CRITERIA.forEach(c => { document.getElementById('w_'+c.id).value = DEFAULT_WEIGHTS[c.id]; });
-    updateWeightTotal();
+function addCriterion() {
+    const newId = 'crit_' + Date.now();
+    const newCrit = { id: newId, label: 'Nouveau critère', short: 'Nouv.', hint: 'Description du critère' };
+    STATE.criteria.push(newCrit);
+    STATE.weights[newId] = 0;
+    
+    const tbody = document.getElementById('criteriaRows');
+    tbody.insertAdjacentHTML('beforeend', renderCriteriaRow(newCrit, STATE.criteria.length - 1));
+    updateCriteriaWeightTotal();
 }
 
-function saveWeights() {
-    let total = 0;
-    CRITERIA.forEach(c => { 
-        const v = parseInt(document.getElementById('w_'+c.id)?.value)||0;
-        STATE.weights[c.id] = v;
-        total += v;
-    });
-    if(total !== 100) {
-        if(!confirm(`Les poids totalisent ${total}% au lieu de 100%. Sauvegarder quand même?`)) return;
+function removeCriterion(id) {
+    if (document.querySelectorAll('#criteriaRows tr').length <= 1) {
+        alert('Vous devez conserver au moins un critère.');
+        return;
     }
-    saveState(); renderScoring(); renderAll();
-    closeWeights();
-    notify('Poids mis à jour — scores recalculés');
+    if (!confirm('Supprimer ce critère? Les scores existants pour ce critère seront perdus.')) return;
+    
+    const row = document.querySelector(`#criteriaRows tr[data-id="${id}"]`);
+    if (row) row.remove();
+    
+    document.querySelectorAll('#criteriaRows tr').forEach((tr, i) => {
+        tr.querySelector('td').textContent = i + 1;
+    });
+    updateCriteriaWeightTotal();
 }
 
-function closeWeights() {
-    document.getElementById('weightsOverlay')?.remove();
+function distributeWeightsEqual() {
+    const rows = document.querySelectorAll('#criteriaRows tr');
+    const count = rows.length;
+    if (count === 0) return;
+    
+    const eq = Math.floor(100 / count);
+    const rem = 100 - eq * count;
+    
+    rows.forEach((row, i) => {
+        row.querySelector('.crit-weight').value = eq + (i < rem ? 1 : 0);
+    });
+    updateCriteriaWeightTotal();
+}
+
+function resetCriteriaDefault() {
+    if (!confirm('Réinitialiser tous les critères aux valeurs par défaut? Les modifications seront perdues.')) return;
+    STATE.criteria = JSON.parse(JSON.stringify(DEFAULT_CRITERIA));
+    STATE.weights = {...DEFAULT_WEIGHTS};
+    closeCriteria();
+    openCriteriaEditor();
+}
+
+function saveCriteria() {
+    const rows = document.querySelectorAll('#criteriaRows tr');
+    const newCriteria = [];
+    const newWeights = {};
+    let totalWeight = 0;
+    
+    rows.forEach((row, i) => {
+        const id = row.dataset.id;
+        const short = row.querySelector('.crit-short').value.trim() || ('C'+(i+1));
+        const label = row.querySelector('.crit-label').value.trim() || 'Critère '+(i+1);
+        const hint = row.querySelector('.crit-hint').value.trim() || '';
+        const weight = parseInt(row.querySelector('.crit-weight').value) || 0;
+        
+        newCriteria.push({ id, short, label, hint });
+        newWeights[id] = weight;
+        totalWeight += weight;
+    });
+    
+    if (newCriteria.length === 0) {
+        alert('Vous devez avoir au moins un critère.');
+        return;
+    }
+    
+    if (totalWeight !== 100) {
+        if (!confirm(`Les poids totalisent ${totalWeight}% au lieu de 100%. Sauvegarder quand même?`)) return;
+    }
+    
+    const removedIds = STATE.criteria.map(c => c.id).filter(id => !newCriteria.find(nc => nc.id === id));
+    if (removedIds.length > 0) {
+        STATE.projects.forEach(p => {
+            if (p.scores) {
+                removedIds.forEach(id => delete p.scores[id]);
+            }
+        });
+    }
+    
+    STATE.criteria = newCriteria;
+    STATE.weights = newWeights;
+    
+    saveState();
+    closeCriteria();
+    renderScoring();
+    renderAll();
+    notify('Critères et poids mis à jour');
+}
+
+function closeCriteria() {
+    document.getElementById('criteriaOverlay')?.remove();
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1421,14 +1821,18 @@ function closeWeights() {
 // ═══════════════════════════════════════════════════════════════
 function renderPeople() {
     const people = STATE.people;
-    let html = '<div class="card" style="padding:0.75rem"><div style="overflow-x:auto"><table class="scoring-table"><thead><tr>';
-    html += '<th style="text-align:left;min-width:140px">Nom</th>';
-    html += '<th style="text-align:left;min-width:140px">Fonction</th>';
-    html += '<th style="text-align:center" title="Heures par semaine disponibles pour des projets">Dispo. h/sem</th>';
-    html += '<th style="text-align:center">Assigné h/sem</th>';
-    html += '<th style="text-align:center">Écart</th>';
-    html += '<th style="text-align:center;width:200px">Charge</th>';
-    html += '<th style="text-align:center;width:40px"></th>';
+    
+    // Table with 12 month columns
+    let html = '<div class="card" style="padding:0.75rem"><div style="overflow-x:auto"><table class="scoring-table" style="min-width:900px"><thead><tr>';
+    html += '<th style="text-align:left;min-width:100px;position:sticky;left:0;background:var(--primary);z-index:3;color:white">Nom</th>';
+    html += '<th style="text-align:left;min-width:90px;color:white">Fonction</th>';
+    
+    // Month headers
+    MONTHS.forEach(m => {
+        html += `<th style="text-align:center;min-width:52px;font-size:0.72rem;color:white" title="${MONTH_LABELS[m]}">${MONTH_LABELS[m]}</th>`;
+    });
+    html += '<th style="text-align:center;min-width:55px;background:var(--primary-light);color:white">Année</th>';
+    html += '<th style="text-align:center;width:35px;color:white"></th>';
     html += '</tr></thead><tbody>';
 
     // Group by function
@@ -1438,90 +1842,121 @@ function renderPeople() {
         grouped[p.funcId].push(p);
     });
 
-    let totalAvail = 0, totalAssigned = 0;
     const funcOrder = FUNCTIONS.map(f=>f.id).filter(fid => grouped[fid]);
-    // Add any functions not in FUNCTIONS list
     Object.keys(grouped).forEach(fid => { if(!funcOrder.includes(fid)) funcOrder.push(fid); });
 
     funcOrder.forEach(fid => {
         const fPeople = grouped[fid] || [];
         const f = FUNCTIONS.find(x=>x.id===fid);
         // Function header
-        html += `<tr style="background:var(--bg-card-hover)"><td colspan="7" style="font-weight:700;font-size:0.82rem;padding:0.5rem 0.6rem;color:var(--text-dim)"><span style="font-size:1rem;margin-right:0.3rem">${f?.icon||'👤'}</span>${f?.label||fid}</td></tr>`;
+        const colSpan = 3 + MONTHS.length + 1;
+        html += `<tr style="background:var(--bg-card-hover)"><td colspan="${colSpan}" style="font-weight:700;font-size:0.82rem;padding:0.5rem 0.6rem;color:var(--text-dim)"><span style="font-size:1rem;margin-right:0.3rem">${f?.icon||'👤'}</span>${f?.label||fid}</td></tr>`;
         
         fPeople.forEach(p => {
-            const assigned = getPersonAssignedHrs(p.id);
-            const gap = p.availHrsWeek - assigned;
-            const pctUsed = p.availHrsWeek > 0 ? Math.round(assigned / p.availHrsWeek * 100) : (assigned > 0 ? 999 : 0);
-            const over = assigned > p.availHrsWeek;
-            totalAvail += p.availHrsWeek;
-            totalAssigned += assigned;
-
+            const yearAvail = getPersonYearlyAvail(p.id);
+            const yearAssigned = getPersonYearlyAssigned(p.id);
+            
             html += `<tr>
-                <td style="font-weight:500;padding-left:1.5rem"><input type="text" value="${esc(p.name)}" style="border:none;background:transparent;font-weight:500;font-size:inherit;color:inherit;width:120px;padding:0.2rem 0" onchange="updatePersonName('${p.id}',this.value)"></td>
-                <td>
-                    <select style="padding:0.3rem 0.4rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:0.82rem" onchange="updatePersonFunc('${p.id}',this.value)">
-                        ${FUNCTIONS.map(f2 => '<option value="'+f2.id+'"'+(f2.id===p.funcId?' selected':'')+'>'+f2.icon+' '+f2.label+'</option>').join('')}
-                    </select>
-                </td>
-                <td style="text-align:center">
-                    <input type="number" min="0" max="40" step="0.5" class="scoring-input" style="width:58px" value="${p.availHrsWeek}" onchange="updatePersonAvail('${p.id}',this.value)">
-                </td>
-                <td style="text-align:center;font-weight:600;color:${over?'var(--error)':'var(--text-muted)'}">${assigned}h</td>
-                <td style="text-align:center;font-weight:700;color:${gap>=0?'var(--success)':'var(--error)'}">${gap>=0?'+':''}${gap}h</td>
-                <td>
-                    <div style="display:flex;align-items:center;gap:0.4rem">
-                        <div class="cap-bar-bg" style="flex:1;height:8px"><div class="cap-bar-fill ${over?'attente':'go'}" style="width:${Math.min(100,pctUsed)}%;height:100%;border-radius:4px"></div></div>
-                        <span style="font-size:0.75rem;font-weight:700;color:${over?'var(--error)':pctUsed>=80?'var(--accent)':'var(--success)'}; min-width:32px;text-align:right">${pctUsed}%</span>
-                    </div>
-                </td>
-                <td style="text-align:center"><button class="btn-remove" onclick="removePerson('${p.id}')" title="Supprimer">×</button></td>
-            </tr>`;
+                <td style="font-weight:500;padding-left:1.2rem;position:sticky;left:0;background:var(--bg-card);z-index:1"><input type="text" value="${esc(p.name)}" style="border:none;background:transparent;font-weight:500;font-size:inherit;color:inherit;width:90px;padding:0.2rem 0" onchange="updatePersonName('${p.id}',this.value)"></td>
+                <td style="font-size:0.75rem;color:var(--text-dim)">${f?.icon||''} ${(f?.label||'').split('—')[0].trim().substring(0,12)}</td>`;
+            
+            // Monthly availability inputs
+            MONTHS.forEach(m => {
+                const avail = p.availByMonth?.[m] || 0;
+                const assigned = getPersonAssignedHrs(p.id, m);
+                const over = assigned > avail;
+                html += `<td style="text-align:center">
+                    <input type="number" min="0" max="200" step="1" class="scoring-input" style="width:42px;font-size:0.75rem;padding:0.2rem;${over?'border-color:var(--error);background:#fef2f2':''}" value="${avail}" onchange="updatePersonAvailMonth('${p.id}','${m}',this.value)" title="Dispo: ${avail}h | Assigné: ${assigned}h">
+                </td>`;
+            });
+            
+            // Yearly total
+            const yearPct = yearAvail > 0 ? Math.round(yearAssigned / yearAvail * 100) : 0;
+            const yearOver = yearAssigned > yearAvail;
+            html += `<td style="text-align:center;font-weight:700;font-size:0.78rem;color:${yearOver?'var(--error)':'var(--success)'}" title="${yearAssigned}h assigné / ${yearAvail}h dispo">${yearAvail}h<div style="font-size:0.65rem;font-weight:400;color:var(--text-dim)">${yearPct}%</div></td>`;
+            
+            html += `<td style="text-align:center"><button class="btn-remove" style="width:24px;height:24px;font-size:0.9rem" onclick="removePerson('${p.id}')" title="Supprimer">×</button></td>`;
+            html += '</tr>';
         });
     });
 
-    // Totals
-    const totalGap = totalAvail - totalAssigned;
+    // Totals row
     html += `<tr style="border-top:2px solid var(--border);background:var(--bg-card-hover)">
-        <td style="font-weight:700" colspan="2">Total (${people.length} personnes)</td>
-        <td style="text-align:center;font-weight:700">${totalAvail}h</td>
-        <td style="text-align:center;font-weight:700">${totalAssigned}h</td>
-        <td style="text-align:center;font-weight:700;color:${totalGap>=0?'var(--success)':'var(--error)'}">${totalGap>=0?'+':''}${totalGap}h</td>
-        <td></td><td></td>
-    </tr>`;
+        <td style="font-weight:700;position:sticky;left:0;background:var(--bg-card-hover);z-index:1" colspan="2">Total (${people.length})</td>`;
+    
+    let grandAvail = 0, grandAssigned = 0;
+    MONTHS.forEach(m => {
+        const mAvail = getTotalAvailableHrs(m);
+        const mAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, m), 0);
+        const mOver = mAssigned > mAvail;
+        grandAvail += mAvail;
+        grandAssigned += mAssigned;
+        html += `<td style="text-align:center;font-weight:700;font-size:0.72rem;color:${mOver?'var(--error)':'var(--text-muted)'}">${mAvail}h</td>`;
+    });
+    html += `<td style="text-align:center;font-weight:700;font-size:0.82rem;color:var(--primary)">${grandAvail}h</td><td></td></tr>`;
+    
+    // Assigned row
+    html += `<tr style="background:var(--bg-card-hover)">
+        <td style="font-weight:600;font-size:0.78rem;color:var(--text-dim);position:sticky;left:0;background:var(--bg-card-hover);z-index:1" colspan="2">Assigné</td>`;
+    MONTHS.forEach(m => {
+        const mAvail = getTotalAvailableHrs(m);
+        const mAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, m), 0);
+        const mOver = mAssigned > mAvail;
+        html += `<td style="text-align:center;font-size:0.72rem;font-weight:600;color:${mOver?'var(--error)':'var(--accent)'}">${mAssigned}h</td>`;
+    });
+    html += `<td style="text-align:center;font-weight:700;font-size:0.82rem;color:var(--accent)">${grandAssigned}h</td><td></td></tr>`;
+    
     html += '</tbody></table></div></div>';
+    
+    // Legend
+    html += `<div style="margin-top:0.5rem;display:flex;gap:1rem;font-size:0.72rem;color:var(--text-dim)">
+        <span>🟡 Mois à capacité réduite (vacances)</span>
+        <span>🔴 Cellule rouge = surcharge</span>
+    </div>`;
+    
     document.getElementById('peopleTableWrap').innerHTML = html;
 
-    // Summary card
-    const utilPct = totalAvail > 0 ? Math.round(totalAssigned / totalAvail * 100) : 0;
-    const overloaded = people.filter(p => getPersonAssignedHrs(p.id) > p.availHrsWeek).length;
+    // Summary card - find months with bottlenecks
+    const bottleneckMonths = MONTHS.filter(m => {
+        const mAvail = getTotalAvailableHrs(m);
+        const mAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, m), 0);
+        return mAssigned > mAvail;
+    });
+    
+    const overloadedPeople = people.filter(p => getPersonYearlyAssigned(p.id) > getPersonYearlyAvail(p.id)).length;
+    
     document.getElementById('peopleSummary').innerHTML = `
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem">
             <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--primary)">${people.length}</div><div style="font-size:0.78rem;color:var(--text-dim)">Ressources</div></div>
-            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--success)">${totalAvail}h/sem</div><div style="font-size:0.78rem;color:var(--text-dim)">Disponible</div></div>
-            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">${totalAssigned}h/sem</div><div style="font-size:0.78rem;color:var(--text-dim)">Assigné</div></div>
-            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:${overloaded?'var(--error)':'var(--success)'}">${overloaded}</div><div style="font-size:0.78rem;color:var(--text-dim)">Surchargé(s)</div></div>
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--success)">${grandAvail}h</div><div style="font-size:0.78rem;color:var(--text-dim)">Dispo. annuelle</div></div>
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:var(--accent)">${grandAssigned}h</div><div style="font-size:0.78rem;color:var(--text-dim)">Assigné annuel</div></div>
+            <div style="text-align:center"><div style="font-size:1.5rem;font-weight:700;color:${bottleneckMonths.length?'var(--error)':'var(--success)'}">${bottleneckMonths.length}</div><div style="font-size:0.78rem;color:var(--text-dim)">Mois en surcharge</div></div>
         </div>
-        <div style="margin-top:0.75rem;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.7);border-radius:8px;font-size:0.78rem;color:var(--text-dim);font-style:italic">
-            🔄 Validé 1× par trimestre par les gestionnaires. Le « dispo h/sem » représente le temps que cette personne peut consacrer aux projets (hors opérations courantes).
+        ${bottleneckMonths.length ? `<div style="margin-top:0.75rem;padding:0.5rem 0.75rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:0.78rem;color:var(--error)">
+            ⚠️ <b>Alerte capacité:</b> ${bottleneckMonths.map(m => MONTH_LABELS[m]).join(', ')}
+        </div>` : ''}
+        <div style="margin-top:0.5rem;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.7);border-radius:8px;font-size:0.78rem;color:var(--text-dim);font-style:italic">
+            🔄 Heures/mois disponibles pour les projets. Ajustez juillet/août/décembre pour les vacances.
         </div>`;
 }
 
 function addPerson() {
     const id = 'r' + Date.now();
-    STATE.people.push({ id, name:'Nouvelle ressource', funcId:'gestionnaires', availHrsWeek:4 });
+    STATE.people.push({ id, name:'Nouvelle ressource', funcId:'gestionnaires', availByMonth: defaultAvailByMonth(16) });
     saveState(); renderPeople(); renderAssign();
 }
 function removePerson(pid) {
     if (!confirm('Supprimer cette ressource?')) return;
     STATE.people = STATE.people.filter(p => p.id !== pid);
-    // Remove assignments
     Object.keys(STATE.assignments).forEach(projId => { delete STATE.assignments[projId][pid]; });
     saveState(); renderAll();
 }
-function updatePersonAvail(pid, val) {
+function updatePersonAvailMonth(pid, month, val) {
     const p = STATE.people.find(x=>x.id===pid);
-    if (p) p.availHrsWeek = parseFloat(val) || 0;
+    if (p) {
+        if (!p.availByMonth) p.availByMonth = {};
+        p.availByMonth[month] = parseFloat(val) || 0;
+    }
     saveState(); renderPeople(); renderRecommend(); renderAnalysis();
 }
 function updatePersonFunc(pid, fid) {
@@ -1546,26 +1981,59 @@ function renderAssign() {
         return;
     }
 
-    let html = '<div class="card" style="padding:0.75rem"><div style="overflow-x:auto"><table class="scoring-table" style="min-width:700px"><thead><tr>';
-    html += '<th style="text-align:left;min-width:180px;position:sticky;left:0;background:var(--bg-card);z-index:2">Projet</th>';
+    // Month selector
+    let html = `<div style="display:flex;align-items:center;gap:1rem;margin-bottom:0.75rem;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:0.5rem">
+            <span style="font-size:0.85rem;font-weight:600;color:var(--text-muted)">📅 Mois:</span>
+            <select id="assignMonthSelect" style="padding:0.4rem 0.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:0.85rem;font-weight:600" onchange="selectedMonth=this.value;renderAssign();renderRecommend();renderAnalysis()">
+                ${MONTHS.map(m => `<option value="${m}" ${m===selectedMonth?'selected':''}>${MONTH_LABELS[m]}</option>`).join('')}
+            </select>
+        </div>
+        <div style="display:flex;gap:0.3rem">
+            ${MONTHS.map(m => {
+                const mAvail = getTotalAvailableHrs(m);
+                const mAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, m), 0);
+                const mOver = mAssigned > mAvail;
+                const isSelected = m === selectedMonth;
+                return `<button onclick="selectedMonth='${m}';renderAssign();renderRecommend();renderAnalysis()" style="padding:0.25rem 0.4rem;border-radius:5px;border:1px solid ${isSelected?'var(--primary)':mOver?'var(--error)':'var(--border)'};background:${isSelected?'var(--primary)':mOver?'#fef2f2':'var(--bg)'};color:${isSelected?'white':mOver?'var(--error)':'var(--text-dim)'};font-size:0.68rem;font-weight:${isSelected?'700':'500'};cursor:pointer" title="${MONTH_LABELS[m]}: ${mAssigned}h / ${mAvail}h">${MONTH_SHORT[m]}</button>`;
+            }).join('')}
+        </div>
+    </div>`;
+
+    // Table
+    html += '<div class="card" style="padding:0.75rem"><div style="overflow-x:auto"><table class="scoring-table" style="min-width:700px"><thead><tr>';
+    html += '<th style="text-align:left;min-width:180px;position:sticky;left:0;background:var(--primary);z-index:2;color:white">Projet</th>';
     people.forEach(p => {
         const f = FUNCTIONS.find(x=>x.id===p.funcId);
-        html += `<th style="text-align:center;min-width:55px" title="${esc(p.name)} — ${f?.label||''} (${p.availHrsWeek}h/sem dispo.)"><span style="font-size:0.72rem;display:block;font-weight:400;color:var(--text-dim)">${f?.icon||'👤'}</span><span style="font-size:0.7rem">${esc(p.name)}</span><div style="font-size:0.6rem;color:var(--text-dim);font-weight:400">${p.availHrsWeek}h</div></th>`;
+        const avail = getPersonAvailHrs(p.id, selectedMonth);
+        const assigned = getPersonAssignedHrs(p.id, selectedMonth);
+        const over = assigned > avail;
+        html += `<th style="text-align:center;min-width:60px;${over?'background:#fef2f2;color:var(--text)':''}" title="${esc(p.name)} — ${f?.label||''} — ${MONTH_LABELS[selectedMonth]}: ${assigned}h / ${avail}h"><span style="font-size:0.82rem;font-weight:600;display:block;${over?'':'color:white'}">${esc(p.name)}</span><div style="font-size:0.62rem;font-weight:400;${over?'color:var(--error)':'color:rgba(255,255,255,0.75)'}">${avail}h</div></th>`;
     });
-    html += '<th style="text-align:center;background:var(--primary-light);min-width:60px">Total h/s</th></tr></thead><tbody>';
+    html += `<th style="text-align:center;background:var(--primary-light);color:white;min-width:60px">Total</th></tr></thead><tbody>`;
 
     projs.forEach((proj, i) => {
         const assignments = STATE.assignments[proj.id] || {};
-        const totalH = people.reduce((s,p) => s + (assignments[p.id]||0), 0);
+        let totalH = 0;
+        
         html += `<tr>
             <td style="font-weight:500;position:sticky;left:0;background:var(--bg-card);z-index:1">
                 <span style="display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:5px;background:rgba(66,153,225,0.12);color:var(--project-color);font-size:0.7rem;font-weight:700;margin-right:0.4rem">${i+1}</span>${esc(proj.name)}
             </td>`;
+        
         people.forEach(p => {
-            const v = assignments[p.id] || 0;
-            const personTotal = getPersonAssignedHrs(p.id);
-            const wouldBeOver = (personTotal - v + (v||0)) > p.availHrsWeek;
-            html += `<td style="text-align:center"><input type="number" min="0" max="40" step="0.5" class="scoring-input" style="width:48px;${v > 0 && wouldBeOver ? 'border-color:var(--error)':''}" value="${v||''}" placeholder="—" onchange="updateAssignment('${proj.id}','${p.id}',this.value)"></td>`;
+            const personAssign = assignments[p.id];
+            let v = 0;
+            if (personAssign) {
+                v = (typeof personAssign === 'object') ? (personAssign[selectedMonth] || 0) : personAssign;
+            }
+            totalH += v;
+            
+            const avail = getPersonAvailHrs(p.id, selectedMonth);
+            const assigned = getPersonAssignedHrs(p.id, selectedMonth);
+            const over = assigned > avail;
+            
+            html += `<td style="text-align:center;${over?'background:#fef2f2':''}"><input type="number" min="0" max="200" step="1" class="scoring-input" style="width:46px;font-size:0.8rem;${v > 0 && over ? 'border-color:var(--error)':''}" value="${v||''}" placeholder="—" onchange="updateAssignmentMonth('${proj.id}','${p.id}','${selectedMonth}',this.value)"></td>`;
         });
         html += `<td style="text-align:center;font-weight:700;font-size:1rem;color:var(--accent)">${totalH || '—'}</td></tr>`;
     });
@@ -1574,30 +2042,58 @@ function renderAssign() {
     html += '<tr style="border-top:2px solid var(--border);background:var(--bg-card-hover)"><td style="font-weight:700;position:sticky;left:0;background:var(--bg-card-hover);z-index:1">Total assigné</td>';
     let grandTotal = 0;
     people.forEach(p => {
-        const assigned = getPersonAssignedHrs(p.id);
-        const over = assigned > p.availHrsWeek;
+        const avail = getPersonAvailHrs(p.id, selectedMonth);
+        const assigned = getPersonAssignedHrs(p.id, selectedMonth);
+        const over = assigned > avail;
         grandTotal += assigned;
-        html += `<td style="text-align:center;font-weight:700;color:${over?'var(--error)':'var(--success)'}"><div>${assigned}h</div><div style="font-size:0.6rem;font-weight:400;color:var(--text-dim)">/${p.availHrsWeek}h</div></td>`;
+        html += `<td style="text-align:center;font-weight:700;color:${over?'var(--error)':'var(--success)'};${over?'background:#fef2f2':''}"><div>${assigned}h</div><div style="font-size:0.6rem;font-weight:400;color:var(--text-dim)">/${avail}h</div></td>`;
     });
-    html += `<td style="text-align:center;font-weight:700;font-size:1.05rem;color:var(--accent)">${grandTotal}h/s</td></tr>`;
+    html += `<td style="text-align:center;font-weight:700;font-size:1.05rem;color:var(--accent)">${grandTotal}h</td></tr>`;
     html += '</tbody></table></div></div>';
 
     // Hint
     html += `<div style="margin-top:0.75rem;padding:0.6rem 1rem;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:0.82rem;color:#0369a1">
-        💡 Assignez les heures/semaine de chaque personne par projet. Les cellules en rouge indiquent un dépassement de la disponibilité. Consultez l'onglet <b>Recommandation</b> pour voir quels projets sont faisables.
+        💡 Assignez les heures/mois pour <b>${MONTH_LABELS[selectedMonth]}</b>. Changez de mois avec le sélecteur ou les boutons ci-dessus. Les colonnes en rouge indiquent une surcharge.
+    </div>`;
+    
+    // Copy to all months button
+    html += `<div style="margin-top:0.5rem;text-align:right">
+        <button class="btn" style="font-size:0.78rem;padding:0.4rem 0.8rem" onclick="copyMonthToAll()" title="Copier les valeurs de ${MONTH_LABELS[selectedMonth]} vers tous les autres mois">📋 Copier ce mois → tous les mois</button>
     </div>`;
 
     document.getElementById('assignTableWrap').innerHTML = html;
 }
 
-function updateAssignment(projId, personId, val) {
+function updateAssignmentMonth(projId, personId, month, val) {
     if (!STATE.assignments[projId]) STATE.assignments[projId] = {};
+    if (!STATE.assignments[projId][personId]) STATE.assignments[projId][personId] = {};
+    
+    // Ensure it's an object (migrate from legacy)
+    if (typeof STATE.assignments[projId][personId] !== 'object') {
+        const oldVal = STATE.assignments[projId][personId];
+        STATE.assignments[projId][personId] = {};
+        MONTHS.forEach(m => STATE.assignments[projId][personId][m] = oldVal);
+    }
+    
     const v = parseFloat(val) || 0;
-    if (v > 0) STATE.assignments[projId][personId] = v;
-    else delete STATE.assignments[projId][personId];
-    // Sync legacy resources field
+    if (v > 0) {
+        STATE.assignments[projId][personId][month] = v;
+    } else {
+        delete STATE.assignments[projId][personId][month];
+        // Clean up empty objects
+        if (Object.keys(STATE.assignments[projId][personId]).length === 0) {
+            delete STATE.assignments[projId][personId];
+        }
+    }
+    
+    // Sync legacy resources field (yearly total)
     const p = STATE.projects.find(x=>x.id===projId);
-    if (p) p.resources = getProjectTotalHrs(projId);
+    if (p) {
+        let yearTotal = 0;
+        MONTHS.forEach(m => yearTotal += getProjectTotalHrs(projId, m));
+        p.resources = yearTotal;
+    }
+    
     saveState();
     renderAssign();
     renderPeople();
@@ -1606,35 +2102,65 @@ function updateAssignment(projId, personId, val) {
     renderGate0();
 }
 
+function copyMonthToAll() {
+    if (!confirm(`Copier les valeurs de ${MONTH_LABELS[selectedMonth]} vers tous les autres mois?`)) return;
+    
+    const projs = sorted();
+    projs.forEach(proj => {
+        const assignments = STATE.assignments[proj.id] || {};
+        STATE.people.forEach(p => {
+            const personAssign = assignments[p.id];
+            if (personAssign && typeof personAssign === 'object') {
+                const val = personAssign[selectedMonth] || 0;
+                MONTHS.forEach(m => {
+                    if (val > 0) personAssign[m] = val;
+                    else delete personAssign[m];
+                });
+            }
+        });
+    });
+    
+    saveState();
+    renderAll();
+    notify('Valeurs copiées vers tous les mois');
+}
+
 // ═══════════════════════════════════════════════════════════════
 // RECOMMENDATION: GO / GOULOT Summary
 // ═══════════════════════════════════════════════════════════════
-function getCapacityResults() {
+function getCapacityResults(month) {
+    const m = month || selectedMonth;
     const projs = sorted();
     const people = STATE.people;
-    // Track cumulative load per person as we stack projects
-    let cumLoad = {};
-    people.forEach(p => cumLoad[p.id] = 0);
+    
+    // Calculate total assigned per person for this month (across ALL projects)
+    const totalAssignedPerPerson = {};
+    people.forEach(p => {
+        totalAssignedPerPerson[p.id] = getPersonAssignedHrs(p.id, m);
+    });
 
     const results = projs.map((proj, i) => {
         const a = STATE.assignments[proj.id] || {};
-        const totalH = getProjectTotalHrs(proj.id);
+        const totalH = getProjectTotalHrs(proj.id, m);
         let bottlenecks = [];
         
-        // Check if adding this project causes any person to exceed capacity
+        // Check if any person assigned to this project is overloaded this month
         people.forEach(p => {
-            const hrs = a[p.id] || 0;
+            const personAssign = a[p.id];
+            let hrs = 0;
+            if (personAssign) {
+                hrs = (typeof personAssign === 'object') ? (personAssign[m] || 0) : personAssign;
+            }
             if (hrs > 0) {
-                const newCum = cumLoad[p.id] + hrs;
-                if (newCum > p.availHrsWeek) {
-                    bottlenecks.push({ person: p, assigned: hrs, over: +(newCum - p.availHrsWeek).toFixed(1) });
+                const avail = getPersonAvailHrs(p.id, m);
+                const totalAssigned = totalAssignedPerPerson[p.id];
+                if (totalAssigned > avail) {
+                    bottlenecks.push({ person: p, month: m, assigned: hrs, over: +(totalAssigned - avail).toFixed(0) });
                 }
             }
         });
 
         const canFit = bottlenecks.length === 0;
-        // Update cumulative
-        people.forEach(p => cumLoad[p.id] += (a[p.id]||0));
 
         return { ...proj, totalH, canFit, bottlenecks, status: canFit ? 'GO' : 'GOULOT' };
     });
@@ -1642,38 +2168,108 @@ function getCapacityResults() {
     return results;
 }
 
-function renderRecommend() {
-    const results = getCapacityResults();
+function getYearlyCapacityResults() {
+    const projs = sorted();
     const people = STATE.people;
-    const totalAvail = getTotalAvailableHrs();
-    const totalAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id), 0);
-    const goP = results.filter(r => r.canFit);
-    const blockP = results.filter(r => !r.canFit);
-    const overloaded = people.filter(p => getPersonAssignedHrs(p.id) > p.availHrsWeek).length;
-    const gap = totalAvail - totalAssigned;
+    
+    // Check each project across all months
+    return projs.map(proj => {
+        let monthlyStatus = {};
+        let allBottlenecks = [];
+        let worstMonth = null;
+        let worstOver = 0;
+        
+        MONTHS.forEach(m => {
+            const results = getCapacityResults(m);
+            const projResult = results.find(r => r.id === proj.id);
+            if (projResult) {
+                monthlyStatus[m] = projResult.canFit ? 'GO' : 'GOULOT';
+                if (!projResult.canFit) {
+                    projResult.bottlenecks.forEach(b => {
+                        allBottlenecks.push({ ...b, month: m });
+                        if (b.over > worstOver) {
+                            worstOver = b.over;
+                            worstMonth = m;
+                        }
+                    });
+                }
+            }
+        });
+        
+        const blockedMonths = MONTHS.filter(m => monthlyStatus[m] === 'GOULOT');
+        const canFit = blockedMonths.length === 0;
+        
+        let yearTotalH = 0;
+        MONTHS.forEach(m => yearTotalH += getProjectTotalHrs(proj.id, m));
+        
+        return {
+            ...proj,
+            totalH: yearTotalH,
+            canFit,
+            blockedMonths,
+            worstMonth,
+            bottlenecks: allBottlenecks,
+            status: canFit ? 'GO' : 'GOULOT'
+        };
+    });
+}
 
-    // KPIs
-    document.getElementById('recommendKPIs').innerHTML = `
-        <div class="card" style="text-align:center;padding:1rem;border-color:rgba(56,161,105,0.3)">
-            <div style="font-size:1.75rem;font-weight:700;color:var(--success)">${goP.length}</div>
-            <div style="font-size:0.78rem;color:var(--text-dim)">Projets faisables</div>
+function renderRecommend() {
+    const yearlyResults = getYearlyCapacityResults();
+    const monthlyResults = getCapacityResults(selectedMonth);
+    const people = STATE.people;
+    
+    // Monthly stats
+    const mAvail = getTotalAvailableHrs(selectedMonth);
+    const mAssigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, selectedMonth), 0);
+    const mGap = mAvail - mAssigned;
+    const mOverloaded = people.filter(p => getPersonAssignedHrs(p.id, selectedMonth) > getPersonAvailHrs(p.id, selectedMonth)).length;
+    
+    // Yearly stats
+    const goP = yearlyResults.filter(r => r.canFit);
+    const blockP = yearlyResults.filter(r => !r.canFit);
+    const blockedMonthsCount = new Set(blockP.flatMap(p => p.blockedMonths)).size;
+
+    // Month selector bar
+    let monthBar = `<div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <span style="font-size:0.85rem;font-weight:600;color:var(--text-muted)">📅 Vue:</span>
+        <select style="padding:0.4rem 0.6rem;border-radius:8px;border:1px solid var(--border);background:var(--bg);font-size:0.85rem;font-weight:600" onchange="selectedMonth=this.value;renderAssign();renderRecommend();renderAnalysis()">
+            ${MONTHS.map(m => `<option value="${m}" ${m===selectedMonth?'selected':''}>${MONTH_LABELS[m]}</option>`).join('')}
+        </select>
+        <div style="display:flex;gap:0.25rem;margin-left:0.5rem">
+            ${MONTHS.map(m => {
+                const results = getCapacityResults(m);
+                const hasBlock = results.some(r => !r.canFit);
+                const isSelected = m === selectedMonth;
+                return `<button onclick="selectedMonth='${m}';renderAssign();renderRecommend();renderAnalysis()" style="padding:0.2rem 0.35rem;border-radius:4px;border:1px solid ${isSelected?'var(--primary)':hasBlock?'var(--error)':'var(--border)'};background:${isSelected?'var(--primary)':hasBlock?'#fef2f2':'var(--bg)'};color:${isSelected?'white':hasBlock?'var(--error)':'var(--text-dim)'};font-size:0.65rem;font-weight:${isSelected?'700':'500'};cursor:pointer" title="${MONTH_LABELS[m]}">${MONTH_SHORT[m]}</button>`;
+            }).join('')}
         </div>
-        <div class="card" style="text-align:center;padding:1rem;border-color:${blockP.length?'rgba(229,62,62,0.3)':'rgba(56,161,105,0.3)'}">
-            <div style="font-size:1.75rem;font-weight:700;color:${blockP.length?'var(--error)':'var(--success)'}">${blockP.length}</div>
-            <div style="font-size:0.78rem;color:var(--text-dim)">Projets bloqués</div>
-        </div>
-        <div class="card" style="text-align:center;padding:1rem;border-color:rgba(198,160,82,0.3)">
-            <div style="font-size:1.75rem;font-weight:700;color:${gap>=0?'var(--success)':'var(--error)'}">${gap>=0?'+':''}${gap}h/s</div>
-            <div style="font-size:0.78rem;color:var(--text-dim)">${gap>=0?'Surplus':'Déficit'} global</div>
-        </div>
-        <div class="card" style="text-align:center;padding:1rem;border-color:${overloaded?'rgba(229,62,62,0.3)':'rgba(56,161,105,0.3)'}">
-            <div style="font-size:1.75rem;font-weight:700;color:${overloaded?'var(--error)':'var(--success)'}">${overloaded}</div>
-            <div style="font-size:0.78rem;color:var(--text-dim)">Personnes surchargées</div>
+    </div>`;
+
+    // KPIs for selected month
+    document.getElementById('recommendKPIs').innerHTML = monthBar + `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem">
+            <div class="card" style="text-align:center;padding:0.85rem;border-color:rgba(56,161,105,0.3)">
+                <div style="font-size:1.5rem;font-weight:700;color:var(--success)">${goP.length}</div>
+                <div style="font-size:0.75rem;color:var(--text-dim)">Projets faisables (année)</div>
+            </div>
+            <div class="card" style="text-align:center;padding:0.85rem;border-color:${blockP.length?'rgba(229,62,62,0.3)':'rgba(56,161,105,0.3)'}">
+                <div style="font-size:1.5rem;font-weight:700;color:${blockP.length?'var(--error)':'var(--success)'}">${blockP.length}</div>
+                <div style="font-size:0.75rem;color:var(--text-dim)">Projets avec goulots</div>
+            </div>
+            <div class="card" style="text-align:center;padding:0.85rem;border-color:rgba(198,160,82,0.3)">
+                <div style="font-size:1.5rem;font-weight:700;color:${mGap>=0?'var(--success)':'var(--error)'}">${mGap>=0?'+':''}${mGap}h</div>
+                <div style="font-size:0.75rem;color:var(--text-dim)">${MONTH_LABELS[selectedMonth]}</div>
+            </div>
+            <div class="card" style="text-align:center;padding:0.85rem;border-color:${blockedMonthsCount?'rgba(229,62,62,0.3)':'rgba(56,161,105,0.3)'}">
+                <div style="font-size:1.5rem;font-weight:700;color:${blockedMonthsCount?'var(--error)':'var(--success)'}">${blockedMonthsCount}</div>
+                <div style="font-size:0.75rem;color:var(--text-dim)">Mois en surcharge</div>
+            </div>
         </div>`;
 
-    // Project list with GO/GOULOT
+    // Project list with monthly bottleneck info
     let content = '';
-    results.forEach((r, i) => {
+    yearlyResults.forEach((r, i) => {
         const statusBadge = r.canFit 
             ? '<span class="badge badge-go">FAISABLE</span>' 
             : '<span class="badge badge-attente">GOULOT</span>';
@@ -1681,33 +2277,58 @@ function renderRecommend() {
         content += `<div style="display:flex;align-items:flex-start;gap:0.6rem;padding:0.75rem 0.85rem;margin-bottom:0.45rem;background:${r.canFit?'rgba(56,161,105,0.04)':'rgba(229,62,62,0.04)'};border-radius:10px;border:1px solid ${r.canFit?'rgba(56,161,105,0.15)':'rgba(229,62,62,0.15)'}">
             <span style="width:24px;height:24px;border-radius:7px;background:${r.canFit?'var(--success-bg)':'var(--error-bg)'};color:${r.canFit?'var(--success)':'var(--error)'};display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;margin-top:0.1rem">${i+1}</span>
             <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;flex-wrap:wrap">
                     <div style="font-size:0.92rem;font-weight:600;color:${r.canFit?'var(--text)':'var(--error)'}">${esc(r.name)}</div>
                     <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0">
-                        <span style="font-size:0.82rem;font-weight:600;color:var(--text-dim)">${r.totalH}h/sem</span>
+                        <span style="font-size:0.82rem;font-weight:600;color:var(--text-dim)">${r.totalH}h/an</span>
                         <span style="font-size:0.78rem;color:var(--text-dim)">${pct(r.scores)}%</span>
                         ${statusBadge}
                     </div>
                 </div>`;
         
-        if (r.bottlenecks.length) {
-            content += '<div style="margin-top:0.35rem;display:flex;flex-wrap:wrap;gap:0.3rem">';
-            r.bottlenecks.forEach(b => {
-                content += `<span style="display:inline-flex;align-items:center;gap:0.25rem;padding:0.2rem 0.55rem;background:var(--error-bg);border-radius:6px;font-size:0.72rem;color:var(--error);font-weight:500">
-                    ${funcIcon(b.person.funcId)} ${esc(b.person.name)} <span style="font-weight:700">+${b.over}h</span>
-                </span>`;
+        // Show blocked months
+        if (r.blockedMonths && r.blockedMonths.length) {
+            content += `<div style="margin-top:0.35rem;display:flex;flex-wrap:wrap;gap:0.25rem;align-items:center">
+                <span style="font-size:0.7rem;color:var(--error);font-weight:500">⚠️ Mois bloqués:</span>`;
+            r.blockedMonths.forEach(m => {
+                content += `<span style="padding:0.15rem 0.4rem;background:#fef2f2;border:1px solid #fecaca;border-radius:4px;font-size:0.68rem;color:var(--error);font-weight:600">${MONTH_LABELS[m]}</span>`;
             });
             content += '</div>';
+            
+            // Show unique bottleneck people
+            const uniqueBottlenecks = [];
+            r.bottlenecks.forEach(b => {
+                if (!uniqueBottlenecks.find(x => x.person.id === b.person.id)) {
+                    uniqueBottlenecks.push(b);
+                }
+            });
+            if (uniqueBottlenecks.length) {
+                content += '<div style="margin-top:0.25rem;display:flex;flex-wrap:wrap;gap:0.25rem">';
+                uniqueBottlenecks.slice(0, 5).forEach(b => {
+                    content += `<span style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.45rem;background:var(--error-bg);border-radius:5px;font-size:0.68rem;color:var(--error);font-weight:500">${funcIcon(b.person.funcId)} ${esc(b.person.name)}</span>`;
+                });
+                if (uniqueBottlenecks.length > 5) {
+                    content += `<span style="font-size:0.68rem;color:var(--text-dim)">+${uniqueBottlenecks.length - 5} autres</span>`;
+                }
+                content += '</div>';
+            }
         }
 
-        // Show assigned people for GO projects too
+        // Show assigned people for GO projects
         if (r.canFit) {
             const a = STATE.assignments[r.id] || {};
-            const assignedPeople = people.filter(p => a[p.id] > 0);
+            const assignedPeople = people.filter(p => {
+                const pa = a[p.id];
+                if (!pa) return false;
+                if (typeof pa === 'object') return Object.values(pa).some(v => v > 0);
+                return pa > 0;
+            });
             if (assignedPeople.length) {
                 content += '<div style="margin-top:0.3rem;display:flex;flex-wrap:wrap;gap:0.25rem">';
                 assignedPeople.forEach(p => {
-                    content += `<span style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.45rem;background:var(--success-bg);border-radius:5px;font-size:0.68rem;color:var(--success)">${funcIcon(p.funcId)} ${esc(p.name)} ${a[p.id]}h</span>`;
+                    const pa = a[p.id];
+                    const hrs = typeof pa === 'object' ? (pa[selectedMonth] || 0) : pa;
+                    content += `<span style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.45rem;background:var(--success-bg);border-radius:5px;font-size:0.68rem;color:var(--success)">${funcIcon(p.funcId)} ${esc(p.name)} ${hrs}h</span>`;
                 });
                 content += '</div>';
             }
@@ -1725,6 +2346,62 @@ function renderAnalysis() {
     const projs = sorted();
     const people = STATE.people;
     
+    // Calculate monthly data for chart
+    const monthlyData = MONTHS.map(m => {
+        const avail = getTotalAvailableHrs(m);
+        const assigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, m), 0);
+        return { month: m, avail, assigned, gap: avail - assigned, pct: avail > 0 ? Math.round(assigned / avail * 100) : 0 };
+    });
+    const maxHrs = Math.max(...monthlyData.map(d => Math.max(d.avail, d.assigned)));
+    
+    // Monthly Capacity vs Demand Chart
+    let html = `<div class="card" style="margin-bottom:1rem;padding:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+            <div style="font-size:0.95rem;font-weight:700;color:var(--text)">📊 Capacité vs Demande — Vue annuelle</div>
+            <div style="display:flex;gap:1rem;font-size:0.75rem">
+                <span style="display:flex;align-items:center;gap:0.3rem"><span style="width:12px;height:12px;background:var(--primary);border-radius:2px"></span> Capacité</span>
+                <span style="display:flex;align-items:center;gap:0.3rem"><span style="width:12px;height:12px;background:var(--accent);border-radius:2px"></span> Demande</span>
+            </div>
+        </div>
+        <div style="display:flex;gap:0.5rem;align-items:flex-end;height:160px;padding:0.5rem 0;border-bottom:2px solid var(--border)">`;
+    
+    monthlyData.forEach(d => {
+        const availH = maxHrs > 0 ? Math.round(d.avail / maxHrs * 130) : 0;
+        const assignH = maxHrs > 0 ? Math.round(d.assigned / maxHrs * 130) : 0;
+        const isOver = d.assigned > d.avail;
+        const isSelected = d.month === selectedMonth;
+        
+        html += `<div style="flex:1;display:flex;flex-direction:column;align-items:center;cursor:pointer;padding:0.25rem;border-radius:6px;${isSelected?'background:rgba(66,153,225,0.1)':''}" onclick="selectedMonth='${d.month}';renderAssign();renderRecommend();renderAnalysis()" title="${MONTH_LABELS[d.month]}: ${d.assigned}h / ${d.avail}h (${d.pct}%)">
+            <div style="display:flex;gap:2px;align-items:flex-end;height:130px">
+                <div style="width:14px;height:${availH}px;background:var(--primary);border-radius:2px 2px 0 0;opacity:0.6" title="Capacité: ${d.avail}h"></div>
+                <div style="width:14px;height:${assignH}px;background:${isOver?'var(--error)':'var(--accent)'};border-radius:2px 2px 0 0" title="Demande: ${d.assigned}h"></div>
+            </div>
+            <div style="font-size:0.65rem;font-weight:${isSelected?'700':'500'};color:${isSelected?'var(--primary)':isOver?'var(--error)':'var(--text-dim)'};margin-top:0.3rem">${MONTH_SHORT[d.month]}</div>
+            <div style="font-size:0.6rem;font-weight:600;color:${isOver?'var(--error)':d.pct>=80?'var(--accent)':'var(--success)'}">${d.pct}%</div>
+        </div>`;
+    });
+    
+    html += `</div>
+        <div style="display:flex;justify-content:space-between;margin-top:0.5rem;font-size:0.75rem;color:var(--text-dim)">
+            <span>Cliquez sur un mois pour voir les détails</span>
+            <span style="font-weight:600;color:${monthlyData.filter(d=>d.assigned>d.avail).length?'var(--error)':'var(--success)'}">${monthlyData.filter(d=>d.assigned>d.avail).length} mois en surcharge</span>
+        </div>
+    </div>`;
+    
+    // Selected month summary
+    const selData = monthlyData.find(d => d.month === selectedMonth);
+    html += `<div class="card" style="margin-bottom:1rem;padding:1rem;background:${selData.gap<0?'rgba(229,62,62,0.03)':'rgba(56,161,105,0.03)'};border-color:${selData.gap<0?'rgba(229,62,62,0.2)':'rgba(56,161,105,0.2)'}">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem">
+            <div style="font-size:1rem;font-weight:700;color:var(--text)">📅 ${MONTH_LABELS[selectedMonth]}</div>
+            <div style="display:flex;gap:1.5rem;font-size:0.9rem">
+                <div><span style="color:var(--text-dim)">Capacité:</span> <span style="font-weight:700;color:var(--primary)">${selData.avail}h</span></div>
+                <div><span style="color:var(--text-dim)">Demande:</span> <span style="font-weight:700;color:var(--accent)">${selData.assigned}h</span></div>
+                <div><span style="color:var(--text-dim)">Écart:</span> <span style="font-weight:700;color:${selData.gap>=0?'var(--success)':'var(--error)'}">${selData.gap>=0?'+':''}${selData.gap}h</span></div>
+                <div><span style="color:var(--text-dim)">Utilisation:</span> <span style="font-weight:700;color:${selData.pct>100?'var(--error)':selData.pct>=80?'var(--accent)':'var(--success)'}">${selData.pct}%</span></div>
+            </div>
+        </div>
+    </div>`;
+    
     // Group people by function
     const grouped = {};
     people.forEach(p => {
@@ -1732,15 +2409,13 @@ function renderAnalysis() {
         grouped[p.funcId].push(p);
     });
 
-    let html = '';
-
     // Per-function sections
     FUNCTIONS.forEach(f => {
         const fPeople = grouped[f.id];
         if (!fPeople || !fPeople.length) return;
 
-        const funcAvail = fPeople.reduce((s,p) => s + p.availHrsWeek, 0);
-        const funcAssigned = fPeople.reduce((s,p) => s + getPersonAssignedHrs(p.id), 0);
+        const funcAvail = fPeople.reduce((s,p) => s + getPersonAvailHrs(p.id, selectedMonth), 0);
+        const funcAssigned = fPeople.reduce((s,p) => s + getPersonAssignedHrs(p.id, selectedMonth), 0);
         const funcPct = funcAvail > 0 ? Math.round(funcAssigned / funcAvail * 100) : 0;
         const funcOver = funcAssigned > funcAvail;
 
@@ -1758,33 +2433,41 @@ function renderAnalysis() {
             </div>`;
 
         fPeople.forEach(p => {
-            const assigned = getPersonAssignedHrs(p.id);
-            const gap = p.availHrsWeek - assigned;
-            const pctUsed = p.availHrsWeek > 0 ? Math.round(assigned / p.availHrsWeek * 100) : (assigned > 0 ? 999 : 0);
-            const over = assigned > p.availHrsWeek;
+            const avail = getPersonAvailHrs(p.id, selectedMonth);
+            const assigned = getPersonAssignedHrs(p.id, selectedMonth);
+            const gap = avail - assigned;
+            const pctUsed = avail > 0 ? Math.round(assigned / avail * 100) : (assigned > 0 ? 999 : 0);
+            const over = assigned > avail;
 
             html += `<div style="margin-bottom:0.65rem;padding:0.6rem 0.75rem;background:${over?'rgba(229,62,62,0.03)':'var(--bg-card-hover)'};border-radius:8px;border:1px solid ${over?'rgba(229,62,62,0.15)':'transparent'}">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.3rem">
                     <div style="font-size:0.88rem;font-weight:600">${esc(p.name)}</div>
                     <div style="display:flex;align-items:center;gap:0.5rem">
-                        <span style="font-size:0.78rem;color:var(--text-dim)">${assigned}h / ${p.availHrsWeek}h</span>
+                        <span style="font-size:0.78rem;color:var(--text-dim)">${assigned}h / ${avail}h</span>
                         <span style="font-size:0.82rem;font-weight:700;color:${over?'var(--error)':pctUsed>=80?'var(--accent)':'var(--success)'}">${pctUsed}%</span>
                         <span style="font-size:0.82rem;font-weight:700;color:${gap>=0?'var(--success)':'var(--error)'}">${gap>=0?'+':''}${gap}h</span>
                     </div>
                 </div>
                 <div class="cap-bar-bg" style="height:8px;margin-bottom:0.35rem"><div class="cap-bar-fill ${over?'attente':'go'}" style="width:${Math.min(100,pctUsed)}%;height:100%;border-radius:4px"></div></div>`;
 
-            // Show which projects this person is assigned to
-            const projList = projs.filter(proj => (STATE.assignments[proj.id]?.[p.id]||0) > 0);
+            // Show which projects this person is assigned to for selected month
+            const projList = projs.filter(proj => {
+                const pa = STATE.assignments[proj.id]?.[p.id];
+                if (!pa) return false;
+                if (typeof pa === 'object') return (pa[selectedMonth] || 0) > 0;
+                return pa > 0;
+            });
+            
             if (projList.length) {
                 html += '<div style="display:flex;flex-wrap:wrap;gap:0.25rem">';
                 projList.forEach(proj => {
-                    const hrs = STATE.assignments[proj.id][p.id];
+                    const pa = STATE.assignments[proj.id][p.id];
+                    const hrs = typeof pa === 'object' ? (pa[selectedMonth] || 0) : pa;
                     html += `<span style="display:inline-flex;align-items:center;gap:0.2rem;padding:0.15rem 0.45rem;background:rgba(66,153,225,0.08);border-radius:5px;font-size:0.7rem;color:var(--project-color);font-weight:500">${esc(proj.name)} <span style="font-weight:700">${hrs}h</span></span>`;
                 });
                 html += '</div>';
             } else {
-                html += '<div style="font-size:0.72rem;color:var(--text-dim);font-style:italic">Aucun projet assigné</div>';
+                html += '<div style="font-size:0.72rem;color:var(--text-dim);font-style:italic">Aucun projet assigné ce mois</div>';
             }
 
             html += '</div>';
@@ -1793,8 +2476,8 @@ function renderAnalysis() {
         html += '</div>';
     });
 
-    if (!html) {
-        html = '<div class="card" style="text-align:center;padding:2rem;color:var(--text-dim)">Aucune ressource définie. Ajoutez des ressources dans l\'onglet Ressources.</div>';
+    if (!Object.keys(grouped).length) {
+        html += '<div class="card" style="text-align:center;padding:2rem;color:var(--text-dim)">Aucune ressource définie. Ajoutez des ressources dans l\'onglet Ressources.</div>';
     }
 
     document.getElementById('analysisContent').innerHTML = html;
@@ -1804,9 +2487,10 @@ function renderAnalysis() {
 // GATE 0
 // ═══════════════════════════════════════════════════════════════
 function renderGate0() {
-    const results = getCapacityResults();
+    const results = getYearlyCapacityResults();
     const np = nonProj();
-    const totalAvail = getTotalAvailableHrs();
+    const yearlyAvail = STATE.people.reduce((s,p) => s + getPersonYearlyAvail(p.id), 0);
+    const avgMonthlyAvail = Math.round(yearlyAvail / MONTHS.length);
     const goP = results.filter(r => r.canFit);
     const blockP = results.filter(r => !r.canFit);
 
@@ -1816,26 +2500,26 @@ function renderGate0() {
             <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700">${results.length}</div><div style="font-size:0.75rem;opacity:.8">Projets évalués</div></div>
             <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#68d391">${goP.length}</div><div style="font-size:0.75rem;opacity:.8">Projets FAISABLES</div></div>
             <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700;color:#fc8181">${blockP.length}</div><div style="font-size:0.75rem;opacity:.8">Projets GOULOT</div></div>
-            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700">${totalAvail}h/s</div><div style="font-size:0.75rem;opacity:.8">Capacité / sem</div></div>
+            <div style="background:rgba(255,255,255,.1);border-radius:8px;padding:1rem;text-align:center"><div style="font-size:1.75rem;font-weight:700">${avgMonthlyAvail}h</div><div style="font-size:0.75rem;opacity:.8">Capacité moy./mois</div></div>
         </div></div>`;
 
     // GO table
     html += '<h3 style="font-size:0.95rem;font-weight:600;color:var(--success);margin-bottom:0.6rem">✓ Projets recommandés (FAISABLES)</h3><div style="overflow-x:auto;margin-bottom:1.25rem"><table class="gate-table"><thead class="gate-table-go"><tr><th>#</th><th>Projet</th><th>Chef</th>';
-    CRITERIA.forEach(c => html += '<th>'+c.short+'</th>');
-    html += '<th>Pondéré</th><th>%</th><th>h/sem</th><th>Statut</th></tr></thead><tbody>';
+    STATE.criteria.forEach(c => html += '<th>'+c.short+'</th>');
+    html += '<th>Pondéré</th><th>%</th><th>h/an</th><th>Statut</th></tr></thead><tbody>';
     goP.forEach((p,i) => {
         html += `<tr style="background:${i%2===0?'var(--bg-card)':'var(--bg-card-hover)'}"><td>${i+1}</td><td>${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)}</td>`;
-        CRITERIA.forEach(c => html += '<td>'+(p.scores?.[c.id]||'—')+'</td>');
+        STATE.criteria.forEach(c => html += '<td>'+(p.scores?.[c.id]||'—')+'</td>');
         html += `<td style="font-weight:700">${weightedScore(p.scores).toFixed(1)}</td><td>${pct(p.scores)}%</td><td>${p.totalH}h</td><td><span class="badge badge-go">GO</span></td></tr>`;
     });
     html += '</tbody></table></div>';
 
     // GOULOT table
     if (blockP.length) {
-        html += '<h3 style="font-size:0.95rem;font-weight:600;color:var(--error);margin-bottom:0.6rem">⏸ Projets bloqués (GOULOTS)</h3><div style="overflow-x:auto;margin-bottom:1.25rem"><table class="gate-table"><thead class="gate-table-attente"><tr><th>#</th><th>Projet</th><th>Chef</th><th>Score %</th><th>h/sem</th><th>Goulots (personnes)</th></tr></thead><tbody>';
+        html += '<h3 style="font-size:0.95rem;font-weight:600;color:var(--error);margin-bottom:0.6rem">⏸ Projets bloqués (GOULOTS)</h3><div style="overflow-x:auto;margin-bottom:1.25rem"><table class="gate-table"><thead class="gate-table-attente"><tr><th>#</th><th>Projet</th><th>Chef</th><th>Score %</th><th>h/an</th><th>Mois bloqués</th></tr></thead><tbody>';
         blockP.forEach((p,i) => {
-            const bNames = p.bottlenecks.map(b => b.person.name + ' (+' + b.over + 'h)').join(', ');
-            html += `<tr style="background:${i%2===0?'var(--bg-card)':'var(--bg-card-hover)'}"><td>${goP.length+i+1}</td><td>${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)}</td><td>${pct(p.scores)}%</td><td>${p.totalH}h</td><td style="color:var(--error);font-size:0.78rem">${bNames}</td></tr>`;
+            const monthsStr = p.blockedMonths.map(m => MONTH_LABELS[m]).slice(0,4).join(', ') + (p.blockedMonths.length > 4 ? '...' : '');
+            html += `<tr style="background:${i%2===0?'var(--bg-card)':'var(--bg-card-hover)'}"><td>${goP.length+i+1}</td><td>${esc(p.name)}</td><td style="color:var(--text-dim)">${esc(p.chef)}</td><td>${pct(p.scores)}%</td><td>${p.totalH}h</td><td style="color:var(--error);font-size:0.75rem">${monthsStr}</td></tr>`;
         });
         html += '</tbody></table></div>';
     }
@@ -1849,23 +2533,681 @@ function renderGate0() {
 
     html += `<div style="margin-top:1.5rem;background:var(--bg-card-hover);border-radius:12px;padding:1rem;border:1px dashed var(--border);text-align:center">
         <p style="margin:0;font-size:0.85rem;color:var(--text-dim)">📌 Après approbation Gate 0 → <b style="color:var(--text-muted)">Microsoft Teams Planner</b> (Chantal) → Gate 1 → Exécution → Gate 2 → Bénéfices → Gate 3</p>
+        <p style="margin:0.5rem 0 0;font-size:0.82rem;color:var(--text-dim)">💡 Besoin d'aide? Cliquez sur <b style="color:#8b5cf6">MARCUS</b> en bas à droite pour une analyse IA</p>
     </div>`;
     document.getElementById('gate0Content').innerHTML = html;
 }
 
 function copyGate0Report() {
-    const results = getCapacityResults();
+    const results = getYearlyCapacityResults();
     const np=nonProj();
-    const totalAvail = getTotalAvailableHrs();
+    const yearlyAvail = STATE.people.reduce((s,p) => s + getPersonYearlyAvail(p.id), 0);
+    const avgMonthlyAvail = Math.round(yearlyAvail / MONTHS.length);
     const goP=results.filter(r=>r.canFit); const blockP=results.filter(r=>!r.canFit);
-    const lines = ['═══════════════════════════════════════','RAPPORT DE RECOMMANDATION — GATE 0','CAMIONS BL — PMO & Innovation','Date: '+new Date().toLocaleDateString('fr-CA'),'═══════════════════════════════════════','',
-        'CAPACITÉ: '+totalAvail+'h/sem | PROJETS: '+results.length+' | GO: '+goP.length+' | GOULOT: '+blockP.length,'',
-        '─── PROJETS GO ───',...goP.map((p,i)=>(i+1)+'. '+p.name+' | '+pct(p.scores)+'% | '+p.totalH+'h/s | Chef:'+p.chef),'',
-        '─── PROJETS GOULOT ───',...blockP.map((p,i)=>(i+1)+'. '+p.name+' | '+pct(p.scores)+'% | '+p.totalH+'h/s | Goulots: '+p.bottlenecks.map(b=>b.person.name+' (+'+b.over+'h)').join(', ')),'',
+    const lines = ['═══════════════════════════════════════','RAPPORT DE RECOMMANDATION — GATE 0','CAMIONS BL — PMO & Innovation','Date: '+new Date().toLocaleDateString('fr-CA'),'Horizon: '+MONTHS.length+' mois ('+MONTH_LABELS[MONTHS[0]]+' à '+MONTH_LABELS[MONTHS[MONTHS.length-1]]+')','═══════════════════════════════════════','',
+        'CAPACITÉ: '+avgMonthlyAvail+'h/mois moy. | PROJETS: '+results.length+' | GO: '+goP.length+' | GOULOT: '+blockP.length,'',
+        '─── PROJETS GO ───',...goP.map((p,i)=>(i+1)+'. '+p.name+' | '+pct(p.scores)+'% | '+p.totalH+'h/an | Chef:'+p.chef),'',
+        '─── PROJETS GOULOT ───',...blockP.map((p,i)=>(i+1)+'. '+p.name+' | '+pct(p.scores)+'% | '+p.totalH+'h/an | Mois bloqués: '+p.blockedMonths.map(m=>MONTH_LABELS[m]).join(', ')),'',
         '─── NON-PROJET ───',...np.map(p=>'• '+p.name+' → '+(BRANCHES[p.branch]?.label||p.branch)),'',
         '═══════════════════════════════════════','Préparé par: Sylvain PMO Consulting','═══════════════════════════════════════'];
     navigator.clipboard?.writeText(lines.join('\n')).then(()=>notify('Rapport copié!'));
 }
+
+// ═══════════════════════════════════════════════════════════════
+// MARCUS — AI ADVISOR
+// ═══════════════════════════════════════════════════════════════
+const MARCUS_AVATAR = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAAAAAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABQAFADASIAAhEBAxEB/8QAHAAAAgMBAQEBAAAAAAAAAAAAAAgFBgcEAwEC/8QAOBAAAQMDAgMECQIFBQAAAAAAAQIDBAAFEQYhEhMxB0FRYQgUIjJCYnGBkaHwFZKxwdEXI0NSU//EABoBAAMAAwEAAAAAAAAAAAAAAAAEBQECBgP/xAAnEQACAgICAgECBwAAAAAAAAAAAQIDBBESIRNBMQVRFCIyQlKB8P/aAAwDAQACEQMRAD8ATKiiigArstVruN0f5NuhPyljqG0E4+p6D71NdmelJesNWRrNEYdfK/aWlGxwPE9EjxJ6DJppLX2QXpi0sJjm3W8NLHLgIWQjG+VuuAEqOcHhH3UaXuyFX17GaMWVvfoWD/T3VSUAuQGmyfhXJbCvxmom8acvdoRx3C2yGG//AEKeJH8wyKcF/sZcUz6zK1E4u4pUFNcDHDHa8fYzxLPgSftUNc+y1cKI56lqCSuSsf7pkNJKHMZ9kJHug5wc5rwjmrfY0/pza/KxQqK0PtH0g1FXLmW+I5EfiYM2IUEJAP8AyN/L0yOgztt0zynk9raJ0ouL0wooorJqFFFFADY+g9p5tjT161K42C/KfTEaUR0QkZVj6kj8UyqB7OwFLd6MeoZVv7EuVa4Hrs8XVxhpsqwgFSeMqWfhSE/npWp6M1BqGTPkQ747b1OHHJRG6pO+Qf0qPky1a9lzErlKlaRcZ2cHIGKp2pCEpURVf7TLtKl3Rq0R73Lti2SS7yBkuEjYbb5GM1WrNLlqUlUTVab7BOQ8l7BW313SoeexB/rS3z2OwhKD0yP1pbm5l7ZfWElJjlp5B+NBJBH4JpWb7AXa71NtrmeKK+tkk9/CojP6U2mpWlFUOc2fcc5Tg7ilXQ/Yj9aXrtnsUyJqeVfOBBgXB7iaUlQKkqKQeFY6pJwT51Yxpx4ab7I2dVJzckuih0UUUyTwooooAcD0TLfEndjT7SFlouT3kSFMq4VlWB39x4SkA1p1h0VY7Tq6bqSKw81LlJwlnnZaYQO5tONhnxJO9ZP6Jb6IfZLIcbVlaro+tYx0IQ2B+grVG5d1ft65UZ9tElW/Lc7k9w8j3/eomRNq2SR02LUpUwkzjgRYj2pLo5IZbU6+lxnKx7yFjCkg+Y227q/MXT1issJuJFt8VmOxxclltGyeI5VuSTvgZ3qk8y+ovypF3lNx2218zlhwZJ+x6VZ4a50+3KmJKzGKcoU4kpJHj9PCldyUdeig64c+T/39nFdYsaY06ylHC2cbJ2xg5GKxLtoQzG0K+Hwkvu3FDbR4cZ4eMk/Ybfetgtslf8S5TxwF/wCaXHt3vN5mapVaLnBVCZgOOchBVnmpUo4cz0IIAAx4HvzVLHr8ig16JubeqYWR/l0Z1RRRVM5sKKK9Ysd+S+liMy486s4ShCSpR+woAYP0QtRMoYu+mX1gL5iZrCSfeGAhwD6YQfzTIuRoktDa/U47rje6ONAOM9aUzsA0TKR2oabRPkOR5cqYEIYZWOJLYSpThWR8oI4fPfpimFterERvWGFhfMjvKacQR7SVJ6/UYIOfOpebVwny+5d+m2uyvgv2k5NtjnFkxobKM5w00kH+lRN6urcSKuPx7kbjNR961zxtKDI7uqjgCq7p60XzWEtx6IhQiFWHZroKWE+ST1WfJOfMik4wc3pdlCUvHHc3pHJCmS5t7CYaQp1RwjPQeZ8hVA7abrYrnqOLp5CBIjWyKYr8lPvl0qKiQfFJJ+5IrR+1e423s701/C7M4XL3PQU89eONKOhcx8I7kjx8cGlxbbVxlRJKickk5JPjVnFr8S7Oezcr8RLUfhEBe7W9a5y47h5jectOhJCXE9xH72rgrQIFwWY6mnkIfjqJy26kKSQNuh+leE2w2KekrjKctzx3wPbbP2O4/NN8U/0iKf3Kvp62KutxRH4+U0N3XMZ4U/5rSLemFaoao9tZ5KCMKXnLrh8Sr+3Sqxo2OGYHN6Leyon5QeEf3qZcWCOox9azDpbB9mhdhU1cbtCl6jKecux2aVLZQfieUAy0P5nK1t/Tc5Vuh6jv8dDcm6IQm4htHAnngEJdSn4ApPUeIHjVT9DyyQ5971DcpyG3Go7cdpCVnYr4isEjvxgGmYvMK33SEYcwtuMlaFlPMA3QoKH6gUlk1+aLTHMLJeNapr49mVWLQdli3Nl65Ql3UE5LT27beeh4R7xHzbeVWbX9/t2lNMSbtPKUR4yAhplGE8azshtA8z+Bk91XVCYqMuFxkd+SsACk19IDXidaaxcbtzyjY4Ci3EGfZeV0W9j5ug+UDxNFVUa1qKNcjJsvlym9lA1TeJ+pL5KvFyc45EheSB7qE/ChPygbCq85GUZCkLkO4VulIVgY+1SMx5uM3xH2lk4QkdVHwrmjMlKjIkKSp5Q3x0SP+o/e9ey6Fz6hngQEIGABgCvF5RCuBJ3I/Fe78hKEE5Fej7lrTplrgYkC7OPKU66XAW+VgcICcZB6/vplAf/Z';
+let currentTab = 'projets';
+
+function getPortfolioSummary() {
+    const results = getYearlyCapacityResults();
+    const people = STATE.people;
+    const goP = results.filter(r => r.canFit);
+    const blockP = results.filter(r => !r.canFit);
+    
+    // Monthly capacity data
+    const monthlyData = MONTHS.map(m => {
+        const avail = getTotalAvailableHrs(m);
+        const assigned = people.reduce((s,p) => s + getPersonAssignedHrs(p.id, m), 0);
+        return { month: MONTH_LABELS[m], avail, assigned, gap: avail - assigned, pct: avail > 0 ? Math.round(assigned / avail * 100) : 0 };
+    });
+    
+    // Criteria info
+    const criteriaInfo = STATE.criteria.map(c => ({
+        name: c.label,
+        short: c.short,
+        weight: STATE.weights[c.id] || 0
+    }));
+    
+    // Project details
+    const projectDetails = results.map(p => ({
+        name: p.name,
+        chef: p.chef || 'Non assigné',
+        scores: STATE.criteria.map(c => ({ criteria: c.short, score: p.scores?.[c.id] || 0 })),
+        weightedScore: weightedScore(p.scores).toFixed(1),
+        percentScore: pct(p.scores),
+        hoursPerYear: p.totalH,
+        status: p.canFit ? 'FAISABLE' : 'GOULOT',
+        blockedMonths: p.blockedMonths ? p.blockedMonths.map(m => MONTH_LABELS[m]) : [],
+        bottleneckPeople: p.bottlenecks ? [...new Set(p.bottlenecks.map(b => b.person.name))].slice(0,3) : []
+    }));
+    
+    // People by function with overload info
+    const peopleByFunction = {};
+    people.forEach(p => {
+        const f = FUNCTIONS.find(x=>x.id===p.funcId);
+        const fName = f?.label || p.funcId;
+        if (!peopleByFunction[fName]) peopleByFunction[fName] = [];
+        
+        const overloadMonths = MONTHS.filter(m => {
+            const avail = getPersonAvailHrs(p.id, m);
+            const assigned = getPersonAssignedHrs(p.id, m);
+            return assigned > avail;
+        }).map(m => MONTH_LABELS[m]);
+        
+        peopleByFunction[fName].push({
+            name: p.name,
+            avgAvailPerMonth: Math.round(getPersonYearlyAvail(p.id) / MONTHS.length),
+            avgAssignedPerMonth: Math.round(getPersonYearlyAssigned(p.id) / MONTHS.length),
+            overloadMonths
+        });
+    });
+    
+    return {
+        company: 'Camions BL',
+        horizon: `${MONTHS.length} mois (${MONTH_LABELS[MONTHS[0]]} à ${MONTH_LABELS[MONTHS[MONTHS.length-1]]})`,
+        totalProjects: results.length,
+        feasibleProjects: goP.length,
+        blockedProjects: blockP.length,
+        criteria: criteriaInfo,
+        monthlyCapacity: monthlyData,
+        projects: projectDetails,
+        resources: peopleByFunction,
+        currentTab: currentTab,
+        selectedMonth: MONTH_LABELS[selectedMonth]
+    };
+}
+
+function getContextPrompt(tab) {
+    const contexts = {
+        'projets': {
+            title: 'Gestion des projets',
+            help: `L'utilisateur est dans l'onglet PROJETS où il gère la liste des initiatives.
+            
+Aide-le à:
+- Comprendre comment ajouter/modifier des projets
+- Déterminer si une initiative devrait être un projet ou non-projet
+- Remplir correctement les informations de la charte de projet
+- Identifier les informations manquantes importantes`
+        },
+        'scoring': {
+            title: 'Scoring et priorisation',
+            help: `L'utilisateur est dans l'onglet SCORING où il évalue les projets selon les critères stratégiques.
+
+Aide-le à:
+- Comprendre comment noter chaque critère (1-10)
+- Équilibrer les poids des critères
+- Identifier les projets mal notés ou avec des scores manquants
+- Interpréter les scores pondérés pour la priorisation`
+        },
+        'people': {
+            title: 'Gestion des ressources',
+            help: `L'utilisateur est dans l'onglet RESSOURCES où il gère les personnes et leur disponibilité mensuelle.
+
+Aide-le à:
+- Ajouter les bonnes personnes avec leurs fonctions
+- Définir la disponibilité réaliste par mois (heures/mois)
+- Tenir compte des vacances (été, décembre)
+- Équilibrer la charge entre les équipes`
+        },
+        'assign': {
+            title: 'Affectation des ressources',
+            help: `L'utilisateur est dans l'onglet AFFECTATION où il assigne les heures par personne par projet par mois.
+
+Aide-le à:
+- Répartir les heures de façon réaliste
+- Éviter les surcharges (cases rouges)
+- Utiliser la fonction "Copier ce mois vers tous"
+- Comprendre l'impact des affectations sur la capacité`
+        },
+        'recommend': {
+            title: 'Recommandations',
+            help: `L'utilisateur est dans l'onglet RECOMMANDATION qui montre quels projets sont faisables vs bloqués.
+
+Aide-le à:
+- Comprendre pourquoi certains projets sont en GOULOT
+- Identifier les personnes qui causent les goulots
+- Proposer des solutions pour débloquer les projets
+- Prioriser les projets à faire passer en Gate 0`
+        },
+        'analyse': {
+            title: 'Analyse de capacité',
+            help: `L'utilisateur est dans l'onglet ANALYSE qui montre le graphique capacité vs demande.
+
+Aide-le à:
+- Interpréter le graphique mensuel
+- Identifier les mois problématiques
+- Comprendre la charge par fonction/personne
+- Planifier les ajustements de capacité`
+        },
+        'gate0': {
+            title: 'Gate 0 - Décision',
+            help: `L'utilisateur est dans l'onglet GATE 0 qui est le rapport final pour la prise de décision.
+
+Aide-le à:
+- Préparer la présentation au comité exécutif
+- Justifier les recommandations GO vs GOULOT
+- Identifier les actions requises pour débloquer les projets
+- Copier le rapport pour partage`
+        }
+    };
+    return contexts[tab] || contexts['projets'];
+}
+
+async function openMarcus() {
+    const context = getContextPrompt(currentTab);
+    const summary = getPortfolioSummary();
+    const isNewSetup = summary.totalProjects === 0 && Object.values(summary.resources).flat().length === 0;
+    
+    // Show selection modal first
+    let html = `<div class="modal-overlay" id="marcusOverlay" onclick="if(event.target===this)closeMarcus()">
+    <div class="modal-box" style="max-width:520px">
+        <div class="charter-modal-header" style="background:linear-gradient(135deg,#8b5cf6,#6366f1)">
+            <div style="display:flex;align-items:center;gap:0.6rem">
+                <img src="${MARCUS_AVATAR}" style="width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,0.5);object-fit:cover">
+                <div>
+                    <span class="charter-modal-title" style="color:white">MARCUS</span>
+                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);margin-top:0.1rem">Comment puis-je t'aider?</div>
+                </div>
+            </div>
+            <button class="charter-btn-close" style="background:rgba(255,255,255,0.2);color:white" onclick="closeMarcus()">✕</button>
+        </div>
+        <div style="padding:1.5rem" id="marcusContent">
+            <div style="display:flex;flex-direction:column;gap:0.85rem">
+                
+                <!-- 1. Portfolio analysis -->
+                <button onclick="runMarcusAnalysis('portfolio')" style="display:flex;align-items:center;gap:1rem;padding:1.1rem;background:var(--bg-card);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;transition:all 0.2s" onmouseover="this.style.borderColor='var(--success)';this.style.background='rgba(56,161,105,0.05)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+                    <div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#22c55e,#16a34a);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span style="font-size:1.5rem">📊</span>
+                    </div>
+                    <div>
+                        <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.25rem">Analyser mon portefeuille</div>
+                        <div style="font-size:0.82rem;color:var(--text-dim)">Diagnostic complet et recommandations stratégiques.</div>
+                    </div>
+                </button>
+                
+                <!-- 2. Help with current section -->
+                <button onclick="runMarcusAnalysis('process')" style="display:flex;align-items:center;gap:1rem;padding:1.1rem;background:var(--bg-card);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;transition:all 0.2s" onmouseover="this.style.borderColor='var(--primary)';this.style.background='rgba(66,153,225,0.05)'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)'">
+                    <div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span style="font-size:1.5rem">❓</span>
+                    </div>
+                    <div>
+                        <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.25rem">Aide avec cette section</div>
+                        <div style="font-size:0.82rem;color:var(--text-dim)">Je ne sais pas quoi faire dans <b>${context.title}</b>.</div>
+                    </div>
+                </button>
+                
+                <!-- 3. First Time Setup - highlighted if new -->
+                <button onclick="runMarcusAnalysis('setup')" style="display:flex;align-items:center;gap:1rem;padding:1.1rem;background:${isNewSetup?'rgba(139,92,246,0.08)':'var(--bg-card)'};border:2px solid ${isNewSetup?'#8b5cf6':'var(--border)'};border-radius:12px;cursor:pointer;text-align:left;transition:all 0.2s;position:relative" onmouseover="this.style.borderColor='#8b5cf6';this.style.background='rgba(139,92,246,0.08)'" onmouseout="this.style.borderColor='${isNewSetup?'#8b5cf6':'var(--border)'}';this.style.background='${isNewSetup?'rgba(139,92,246,0.08)':'var(--bg-card)'}'" >
+                    <div style="width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#6366f1);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span style="font-size:1.5rem">🚀</span>
+                    </div>
+                    <div style="flex:1">
+                        <div style="font-size:1rem;font-weight:700;color:var(--text);margin-bottom:0.25rem">Première configuration</div>
+                        <div style="font-size:0.82rem;color:var(--text-dim)">Guide pas à pas pour démarrer de zéro.</div>
+                    </div>
+                    ${isNewSetup ? '<div style="position:absolute;top:-8px;right:-8px;background:#8b5cf6;color:white;font-size:0.65rem;font-weight:700;padding:3px 8px;border-radius:10px">RECOMMANDÉ</div>' : ''}
+                </button>
+                
+                <!-- Separator -->
+                <div style="border-top:1px dashed var(--border);margin:0.5rem 0"></div>
+                
+                <!-- 4. Reset / Start fresh - with DANGEREUX tag -->
+                <button onclick="closeMarcus();startResetProcess()" style="display:flex;align-items:center;gap:1rem;padding:0.9rem;background:var(--bg-card);border:2px solid var(--border);border-radius:12px;cursor:pointer;text-align:left;transition:all 0.2s;opacity:0.7;position:relative" onmouseover="this.style.borderColor='var(--error)';this.style.background='rgba(229,62,62,0.05)';this.style.opacity='1'" onmouseout="this.style.borderColor='var(--border)';this.style.background='var(--bg-card)';this.style.opacity='0.7'">
+                    <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <span style="font-size:1.2rem">🗑️</span>
+                    </div>
+                    <div style="flex:1">
+                        <div style="font-size:0.9rem;font-weight:700;color:var(--error);margin-bottom:0.15rem">Repartir à zéro</div>
+                        <div style="font-size:0.75rem;color:var(--text-dim)">Effacer tous les projets et recommencer.</div>
+                    </div>
+                    <div style="background:#dc2626;color:white;font-size:0.6rem;font-weight:700;padding:3px 6px;border-radius:4px;letter-spacing:0.5px">⚠️ DANGEREUX</div>
+                </button>
+            </div>
+        </div>
+    </div></div>`;
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+async function runMarcusAnalysis(mode) {
+    const context = getContextPrompt(currentTab);
+    
+    // Show loading state
+    document.getElementById('marcusContent').innerHTML = `
+        <div style="text-align:center;padding:3rem">
+            <img src="${MARCUS_AVATAR}" style="width:80px;height:80px;border-radius:50%;border:3px solid var(--primary);margin-bottom:1rem;animation:pulse 1.5s infinite">
+            <div style="font-size:1rem;font-weight:600;color:var(--text-muted);margin-bottom:0.5rem">MARCUS analyse...</div>
+            <div style="font-size:0.85rem;color:var(--text-dim)">${mode === 'setup' ? 'Préparation du guide de démarrage...' : mode === 'process' ? 'Préparation des instructions...' : 'Examen de votre portefeuille en cours'}</div>
+        </div>
+        <style>@keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }</style>`;
+    
+    // Update modal title
+    document.querySelector('#marcusOverlay .charter-modal-header > div > div > div:last-child').textContent = 
+        mode === 'setup' ? 'Guide de première configuration' : mode === 'process' ? `Aide — ${context.title}` : 'Analyse du portefeuille';
+    
+    // Expand modal for results
+    document.querySelector('#marcusOverlay .modal-box').style.maxWidth = '800px';
+    
+    // Gather portfolio data
+    const summary = getPortfolioSummary();
+    const contextInfo = getContextPrompt(currentTab);
+    
+    // Build prompts based on mode
+    let systemPrompt, userPrompt;
+    
+    if (mode === 'setup') {
+        systemPrompt = `Tu es MARCUS, un assistant PMO intégré dans l'outil de gestion de portefeuille de projets de Camions BL.
+
+L'utilisateur vient de déployer l'application et a besoin d'un guide complet pour configurer le système de zéro.
+
+WORKFLOW IMPORTANT:
+- Les initiatives à évaluer PROVIENNENT de Microsoft Teams Planner
+- Après approbation Gate 0, les projets RETOURNENT dans Teams Planner pour exécution
+- Cet outil sert à la phase PRÉ-GATE 0 (évaluation, priorisation, planification capacité)
+
+L'OUTIL CONTIENT CES ONGLETS (dans l'ordre):
+1. PROCESSUS - Diagramme du workflow PMO (informatif seulement)
+2. TRIAGE - Déterminer si une initiative est un projet ou non
+3. PORTEFEUILLE - Liste des projets avec chartes
+4. SCORING - Évaluer les projets selon des critères pondérés
+5. RESSOURCES - Définir les personnes et leur disponibilité mensuelle
+6. AFFECTATION - Assigner les heures par projet/personne/mois
+7. RECOMMANDATION - Voir quels projets sont faisables vs bloqués
+8. ANALYSE - Graphiques de capacité vs demande
+9. GATE 0 - Rapport final pour décision exécutive
+
+TON RÔLE: Guider l'utilisateur étape par étape pour une première configuration complète.
+
+STYLE:
+- Utilise le tutoiement
+- Sois encourageant et pédagogique
+- Donne des exemples concrets
+- Explique le POURQUOI de chaque étape
+
+FORMAT: Utilise UNIQUEMENT **TITRE EN GRAS** pour les sections (pas de # ou ##). Utilise des tirets - pour les listes.`;
+
+        userPrompt = `L'utilisateur démarre avec un système vide et a besoin d'un guide de configuration complet.
+
+ÉTAT ACTUEL:
+- Projets: ${summary.totalProjects}
+- Ressources: ${Object.values(summary.resources).flat().length}
+
+Fournis un guide complet de démarrage avec ces sections:
+
+**BIENVENUE DANS L'OUTIL PMO**
+(2-3 phrases d'introduction encourageantes. Mentionner que les initiatives viennent de Teams Planner et y retournent après Gate 0.)
+
+**ÉTAPE 1: CONFIGURER LES RESSOURCES**
+(Aller dans l'onglet Ressources, ajouter les personnes clés avec leur fonction et disponibilité mensuelle. Donner un exemple concret.)
+
+**ÉTAPE 2: IMPORTER VOS INITIATIVES**
+(Les initiatives proviennent de Microsoft Teams Planner. Aller dans Triage pour les classifier, puis dans Portefeuille pour créer les chartes. Expliquer les champs importants.)
+
+**ÉTAPE 3: ÉVALUER ET PRIORISER**
+(Aller dans l'onglet Scoring, noter chaque projet sur les critères, expliquer l'impact des poids.)
+
+**ÉTAPE 4: AFFECTER LES RESSOURCES**
+(Aller dans l'onglet Affectation, distribuer les heures par personne/projet/mois. Attention aux surcharges.)
+
+**ÉTAPE 5: ANALYSER ET DÉCIDER**
+(Consulter Recommandation pour voir les goulots, ajuster, puis utiliser Gate 0 pour le rapport final. Après approbation, les projets retournent dans Teams Planner pour exécution.)
+
+**CONSEIL CLÉ**
+(Un conseil important pour réussir avec l'outil)
+
+Réponds en français, de façon claire, structurée et encourageante.`;
+
+    } else if (mode === 'process') {
+        systemPrompt = `Tu es MARCUS, un assistant PMO intégré dans l'outil de gestion de portefeuille de projets de Camions BL.
+
+L'utilisateur est dans la section "${contextInfo.title}" et a besoin d'aide pour comprendre quoi faire.
+
+${contextInfo.help}
+
+TON RÔLE: Guide l'utilisateur pas à pas, de façon simple et pratique. Explique QUOI faire et COMMENT le faire dans cette section spécifique.
+
+STYLE:
+- Utilise le tutoiement
+- Sois concis et direct
+- Numérote les étapes
+- Donne des exemples concrets basés sur leurs données
+
+FORMAT: Utilise UNIQUEMENT **TITRE EN GRAS** pour les sections (pas de # ou ##). Utilise des tirets - pour les listes.`;
+
+        userPrompt = `L'utilisateur est dans la section "${contextInfo.title}" et ne sait pas quoi faire.
+
+DONNÉES ACTUELLES:
+- Nombre de projets: ${summary.totalProjects}
+- Projets faisables: ${summary.feasibleProjects}
+- Projets bloqués: ${summary.blockedProjects}
+- Mois sélectionné: ${summary.selectedMonth}
+- Nombre de ressources: ${Object.values(summary.resources).flat().length}
+
+Fournis exactement ces 4 sections (utilise **TITRE** pour chaque):
+
+**OBJECTIF DE CETTE SECTION**
+(1-2 phrases: à quoi sert cet onglet)
+
+**ÉTAPES À SUIVRE**
+(3-5 étapes avec tirets, concrètes et actionnables)
+
+**CONSEILS PRATIQUES**
+(2-3 astuces avec tirets)
+
+**PROCHAINE ÉTAPE**
+(où aller après)
+
+Réponds en français, de façon claire et encourageante.`;
+
+    } else {
+        systemPrompt = `Tu es MARCUS, un conseiller expert en gestion de portefeuille de projets (PMO) pour Camions BL, un concessionnaire de camions au Québec.
+
+Tu analyses les données de leur portefeuille de projets et donnes des recommandations stratégiques en français pour:
+1. Optimiser l'allocation des ressources
+2. Résoudre les goulots d'étranglement
+3. Prioriser les projets pour passer Gate 0
+4. Identifier les risques de capacité
+
+STYLE:
+- Sois concis et pratique
+- Utilise le tutoiement professionnel
+- Donne des recommandations actionnables
+
+FORMAT: Utilise UNIQUEMENT **TITRE EN GRAS** pour les sections (pas de # ou ##). Utilise des tirets - pour les listes.`;
+
+        userPrompt = `DONNÉES DU PORTEFEUILLE:
+${JSON.stringify(summary, null, 2)}
+
+Fournis exactement ces 4 sections (utilise **TITRE** pour chaque):
+
+**DIAGNOSTIC**
+(2-3 phrases sur la santé du portefeuille)
+
+**ACTIONS PRIORITAIRES**
+(3-5 actions concrètes avec tirets)
+
+**PROJETS BLOQUÉS**
+(pour chaque GOULOT, une solution spécifique avec tirets)
+
+**ALERTES**
+(risques ou problèmes urgents avec tirets)
+
+Réponds en français avec des recommandations pratiques.`;
+    }
+
+    try {
+        const response = await fetch("/api/marcus", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                system: systemPrompt,
+                max_tokens: mode === 'setup' ? 2500 : 1500,
+                messages: [
+                    { role: "user", content: userPrompt }
+                ]
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(data.error || 'Erreur API');
+        }
+        
+        const aiResponse = data.content?.[0]?.text || "Erreur: Pas de réponse";
+        
+        // Format and display response
+        const formattedResponse = formatMarcusResponse(aiResponse, mode);
+        document.getElementById('marcusContent').innerHTML = formattedResponse;
+        
+    } catch (error) {
+        document.getElementById('marcusContent').innerHTML = `
+            <div style="text-align:center;padding:2rem">
+                <div style="font-size:2rem;margin-bottom:1rem">⚠️</div>
+                <div style="font-size:1rem;font-weight:600;color:var(--error);margin-bottom:0.5rem">Connexion impossible</div>
+                <div style="font-size:0.85rem;color:var(--text-dim)">${error.message}</div>
+                <button onclick="openMarcus()" class="btn" style="margin-top:1rem">🔄 Réessayer</button>
+            </div>`;
+    }
+}
+
+function formatMarcusResponse(text, mode) {
+    // First, convert any ## or ### headers to bold format
+    let html = text
+        .replace(/^###\s*(.+)$/gm, '**$1**')
+        .replace(/^##\s*(.+)$/gm, '**$1**')
+        .replace(/^#\s*(.+)$/gm, '**$1**');
+    
+    // Convert markdown-style formatting to HTML
+    html = html
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/\n- /g, '</li><li>')
+        .replace(/\n\* /g, '</li><li>')
+        .replace(/\n(\d+)\. /g, '</li><li>')
+        .replace(/^- /gm, '<li>')
+        .replace(/^\* /gm, '<li>')
+        .replace(/^(\d+)\. /gm, '<li>');
+    
+    // Wrap in paragraphs
+    html = '<p>' + html + '</p>';
+    
+    // Section styling for SETUP mode
+    html = html.replace(/<strong>([^<]*BIENVENUE[^<]*)<\/strong>/gi, '<h3 style="color:#8b5cf6;font-size:1.05rem;margin:0.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.2rem">👋</span> $1</h3>')
+               .replace(/<strong>([^<]*ÉTAPE 1[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="background:var(--primary);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700">1</span> $1</h3>')
+               .replace(/<strong>([^<]*ÉTAPE 2[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="background:var(--primary);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700">2</span> $1</h3>')
+               .replace(/<strong>([^<]*ÉTAPE 3[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="background:var(--primary);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700">3</span> $1</h3>')
+               .replace(/<strong>([^<]*ÉTAPE 4[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="background:var(--primary);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700">4</span> $1</h3>')
+               .replace(/<strong>([^<]*ÉTAPE 5[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="background:var(--primary);color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700">5</span> $1</h3>')
+               .replace(/<strong>([^<]*CONSEIL CLÉ[^<]*|[^<]*CONSEIL[^<]*CLÉ[^<]*)<\/strong>/gi, '<h3 style="color:var(--success);font-size:0.95rem;margin:1.5rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem;padding-top:0.75rem;border-top:1px solid var(--border)"><span style="font-size:1.1rem">💎</span> $1</h3>');
+    
+    // Section styling for PROCESS mode
+    html = html.replace(/<strong>([^<]*OBJECTIF[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">🎯</span> $1</h3>')
+               .replace(/<strong>([^<]*ÉTAPES[^<]*|[^<]*SUIVRE[^<]*)<\/strong>/gi, '<h3 style="color:var(--success);font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">📋</span> $1</h3>')
+               .replace(/<strong>([^<]*CONSEILS[^<]*|[^<]*PRATIQUES[^<]*)<\/strong>/gi, '<h3 style="color:#8b5cf6;font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">💡</span> $1</h3>')
+               .replace(/<strong>([^<]*PROCHAINE[^<]*|[^<]*SUITE[^<]*)<\/strong>/gi, '<h3 style="color:var(--accent);font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">➡️</span> $1</h3>');
+    
+    // Section styling for PORTFOLIO mode
+    html = html.replace(/<strong>([^<]*DIAGNOSTIC[^<]*)<\/strong>/gi, '<h3 style="color:var(--primary);font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">🔍</span> $1</h3>')
+               .replace(/<strong>([^<]*ACTIONS[^<]*|[^<]*PRIORITAIRES[^<]*)<\/strong>/gi, '<h3 style="color:var(--success);font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">✅</span> $1</h3>')
+               .replace(/<strong>([^<]*BLOQUÉS[^<]*|[^<]*GOULOT[^<]*)<\/strong>/gi, '<h3 style="color:var(--error);font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">🚧</span> $1</h3>')
+               .replace(/<strong>([^<]*ALERTES[^<]*|[^<]*RISQUES[^<]*)<\/strong>/gi, '<h3 style="color:#d97706;font-size:0.95rem;margin:1.25rem 0 0.5rem;display:flex;align-items:center;gap:0.4rem"><span style="font-size:1.1rem">⚠️</span> $1</h3>');
+    
+    // Style lists
+    html = html.replace(/<li>/g, '<li style="margin:0.35rem 0;padding-left:0.25rem">');
+    
+    // Wrap lists properly
+    html = html.replace(/(<li[^>]*>.*?<\/li>)+/g, '<ul style="margin:0.5rem 0;padding-left:1.25rem;list-style-type:disc">$&</ul>');
+    
+    // Clean up empty tags
+    html = html.replace(/<p><\/p>/g, '').replace(/<\/li><\/ul><ul[^>]*><li/g, '</li><li');
+    
+    // Mode labels for footer
+    const modeLabels = { setup: '🚀 Configuration', process: '❓ Aide', portfolio: '📊 Analyse' };
+    const modeLabel = modeLabels[mode] || modeLabels.portfolio;
+    
+    return `<div style="font-size:0.88rem;line-height:1.6;color:var(--text);max-height:60vh;overflow-y:auto;padding-right:0.5rem">${html}</div>
+        <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+                <button onclick="runMarcusAnalysis('${mode}')" class="btn" style="font-size:0.78rem;padding:0.4rem 0.8rem;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;border:none">🔄 Actualiser</button>
+                <button onclick="closeMarcus();openMarcus()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.4rem 0.8rem">← Autres options</button>
+                <button onclick="closeMarcus()" class="btn btn-secondary" style="font-size:0.78rem;padding:0.4rem 0.8rem">✓ Fermer</button>
+            </div>
+            <span style="font-size:0.68rem;color:var(--text-dim)">MARCUS ${modeLabel} — ${new Date().toLocaleTimeString('fr-CA', {hour:'2-digit', minute:'2-digit'})}</span>
+        </div>`;
+}
+
+function closeMarcus() {
+    document.getElementById('marcusOverlay')?.remove();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RESET / START FRESH (Triple verification)
+// ═══════════════════════════════════════════════════════════════
+function startResetProcess() {
+    const projectCount = STATE.projects.length;
+    const peopleCount = Object.values(STATE.people).flat().length;
+    
+    if (projectCount === 0 && peopleCount === 0) {
+        notify('Le système est déjà vide!', 'info');
+        return;
+    }
+    
+    // Step 1: First confirmation
+    let html = `<div class="modal-overlay" id="resetOverlay" onclick="if(event.target===this)closeResetModal()">
+    <div class="modal-box" style="max-width:480px">
+        <div class="charter-modal-header" style="background:linear-gradient(135deg,#ef4444,#dc2626)">
+            <div style="display:flex;align-items:center;gap:0.6rem">
+                <span style="font-size:1.5rem">⚠️</span>
+                <div>
+                    <span class="charter-modal-title" style="color:white">Repartir à zéro</span>
+                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.8);margin-top:0.1rem">Étape 1 de 3</div>
+                </div>
+            </div>
+            <button class="charter-btn-close" style="background:rgba(255,255,255,0.2);color:white" onclick="closeResetModal()">✕</button>
+        </div>
+        <div style="padding:1.5rem" id="resetContent">
+            <div style="text-align:center;margin-bottom:1.5rem">
+                <div style="font-size:3rem;margin-bottom:1rem">🗑️</div>
+                <h3 style="color:var(--error);margin:0 0 0.5rem">Attention: Action irréversible</h3>
+                <p style="color:var(--text-dim);font-size:0.9rem;margin:0">Cette action va supprimer <b>définitivement</b> toutes les données.</p>
+            </div>
+            
+            <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:1rem;margin-bottom:1.5rem">
+                <div style="font-size:0.85rem;font-weight:600;color:var(--error);margin-bottom:0.5rem">Données qui seront effacées:</div>
+                <div style="font-size:0.9rem;color:var(--text)">
+                    <div>• <b>${projectCount}</b> projet(s)</div>
+                    <div>• <b>${peopleCount}</b> ressource(s)</div>
+                    <div>• Toutes les affectations</div>
+                    <div>• Tous les scores</div>
+                </div>
+            </div>
+            
+            <p style="font-size:0.85rem;color:var(--text-dim);text-align:center;margin-bottom:1.5rem">
+                💡 Conseil: Exportez vos données avant de continuer.
+            </p>
+            
+            <div style="display:flex;gap:0.75rem">
+                <button onclick="closeResetModal()" class="btn btn-secondary" style="flex:1">Annuler</button>
+                <button onclick="resetStep2()" class="btn" style="flex:1;background:var(--error);color:white;border-color:var(--error)">Continuer →</button>
+            </div>
+        </div>
+    </div></div>`;
+    
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function resetStep2() {
+    document.getElementById('resetContent').innerHTML = `
+        <div style="text-align:center;margin-bottom:1.5rem">
+            <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
+            <h3 style="color:var(--error);margin:0 0 0.5rem">Confirmation requise</h3>
+            <p style="color:var(--text-dim);font-size:0.9rem;margin:0">Étape 2 de 3: Tapez <b>EFFACER</b> pour confirmer.</p>
+        </div>
+        
+        <div style="margin-bottom:1.5rem">
+            <input type="text" id="resetConfirmInput" placeholder="Tapez EFFACER ici" style="width:100%;padding:0.85rem;border:2px solid var(--error);border-radius:8px;font-size:1.1rem;text-align:center;text-transform:uppercase;box-sizing:border-box" oninput="checkResetInput()">
+            <div id="resetInputFeedback" style="font-size:0.8rem;text-align:center;margin-top:0.5rem;color:var(--text-dim)"></div>
+        </div>
+        
+        <div style="display:flex;gap:0.75rem">
+            <button onclick="closeResetModal()" class="btn btn-secondary" style="flex:1">Annuler</button>
+            <button id="resetStep2Btn" onclick="resetStep3()" class="btn" style="flex:1;background:#ccc;color:white;border-color:#ccc;cursor:not-allowed" disabled>Continuer →</button>
+        </div>`;
+    
+    document.querySelector('#resetOverlay .charter-modal-header > div > div > div:last-child').textContent = 'Étape 2 de 3';
+    document.getElementById('resetConfirmInput').focus();
+}
+
+function checkResetInput() {
+    const input = document.getElementById('resetConfirmInput').value.toUpperCase();
+    const btn = document.getElementById('resetStep2Btn');
+    const feedback = document.getElementById('resetInputFeedback');
+    
+    if (input === 'EFFACER') {
+        btn.disabled = false;
+        btn.style.background = 'var(--error)';
+        btn.style.borderColor = 'var(--error)';
+        btn.style.cursor = 'pointer';
+        feedback.innerHTML = '✓ Correct';
+        feedback.style.color = 'var(--success)';
+    } else {
+        btn.disabled = true;
+        btn.style.background = '#ccc';
+        btn.style.borderColor = '#ccc';
+        btn.style.cursor = 'not-allowed';
+        feedback.innerHTML = input.length > 0 ? '✗ Tapez exactement "EFFACER"' : '';
+        feedback.style.color = 'var(--error)';
+    }
+}
+
+function resetStep3() {
+    document.getElementById('resetContent').innerHTML = `
+        <div style="text-align:center;margin-bottom:1.5rem">
+            <div style="font-size:3rem;margin-bottom:1rem">🚨</div>
+            <h3 style="color:var(--error);margin:0 0 0.5rem">Dernière chance!</h3>
+            <p style="color:var(--text-dim);font-size:0.9rem;margin:0">Étape 3 de 3: Êtes-vous <b>absolument certain</b>?</p>
+        </div>
+        
+        <div style="background:rgba(239,68,68,0.15);border:2px solid rgba(239,68,68,0.5);border-radius:8px;padding:1.25rem;margin-bottom:1.5rem;text-align:center">
+            <div style="font-size:1.1rem;font-weight:700;color:var(--error);margin-bottom:0.5rem">⚠️ POINT DE NON-RETOUR ⚠️</div>
+            <div style="font-size:0.9rem;color:var(--text)">
+                Cette action est <b>DÉFINITIVE</b> et <b>IRRÉVERSIBLE</b>.<br>
+                Toutes vos données seront perdues pour toujours.
+            </div>
+        </div>
+        
+        <div style="display:flex;gap:0.75rem">
+            <button onclick="closeResetModal()" class="btn" style="flex:1;background:var(--success);color:white;border-color:var(--success)">🛡️ Non, annuler</button>
+            <button onclick="executeReset()" class="btn" style="flex:1;background:var(--error);color:white;border-color:var(--error)">🗑️ Oui, tout effacer</button>
+        </div>`;
+    
+    document.querySelector('#resetOverlay .charter-modal-header > div > div > div:last-child').textContent = 'Étape 3 de 3';
+}
+
+function executeReset() {
+    // Reset all data
+    STATE.projects = [];
+    STATE.people = { TI: [], Ops: [], RH: [], Ventes: [], Finance: [], Direction: [] };
+    STATE.assignments = {};
+    STATE.triageItems = [];
+    
+    // Save and refresh
+    saveState();
+    
+    // Show success and close
+    document.getElementById('resetContent').innerHTML = `
+        <div style="text-align:center;padding:2rem">
+            <div style="font-size:4rem;margin-bottom:1rem">✨</div>
+            <h3 style="color:var(--success);margin:0 0 0.5rem">Réinitialisation complète!</h3>
+            <p style="color:var(--text-dim);font-size:0.9rem;margin:0 0 1.5rem">Le système est maintenant vide et prêt pour une nouvelle configuration.</p>
+            <button onclick="closeResetModal();location.reload()" class="btn" style="background:var(--success);color:white;border-color:var(--success)">🚀 Commencer</button>
+        </div>`;
+    
+    document.querySelector('#resetOverlay .charter-modal-header').style.background = 'linear-gradient(135deg,#22c55e,#16a34a)';
+    document.querySelector('#resetOverlay .charter-modal-header span').textContent = '✓';
+    document.querySelector('#resetOverlay .charter-modal-header .charter-modal-title').textContent = 'Terminé';
+    document.querySelector('#resetOverlay .charter-modal-header > div > div > div:last-child').textContent = 'Système réinitialisé';
+}
+
+function closeResetModal() {
+    document.getElementById('resetOverlay')?.remove();
+}
+
+// Keep old function name for compatibility
+function openAIAdvisor() { openMarcus(); }
+function closeAIAdvisor() { closeMarcus(); }
 
 // ═══════════════════════════════════════════════════════════════
 // IMPORT/EXPORT
@@ -1882,7 +3224,7 @@ function importData(e) {
     const r = new FileReader();
     r.onload = ev => {
         try { const d = JSON.parse(ev.target.result);
-            if(d.projects) { STATE.projects=d.projects; STATE.maxCapacity=d.maxCapacity||70; STATE.weights=d.weights||{...DEFAULT_WEIGHTS}; STATE.people=d.people||JSON.parse(JSON.stringify(DEFAULT_PEOPLE)); STATE.assignments=d.assignments||JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS)); saveState(); renderAll(); notify('Données importées'); }
+            if(d.projects) { STATE.projects=d.projects; STATE.maxCapacity=d.maxCapacity||70; STATE.weights=d.weights||{...DEFAULT_WEIGHTS}; STATE.criteria=d.criteria||JSON.parse(JSON.stringify(DEFAULT_CRITERIA)); STATE.people=d.people||JSON.parse(JSON.stringify(DEFAULT_PEOPLE)); STATE.assignments=d.assignments||JSON.parse(JSON.stringify(DEFAULT_ASSIGNMENTS)); saveState(); renderAll(); notify('Données importées'); }
             else alert('Format invalide');
         } catch(err) { alert('Erreur: '+err.message); }
     };
@@ -1890,9 +3232,81 @@ function importData(e) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// LOGIN / AUTHENTICATION
+// ═══════════════════════════════════════════════════════════════
+const AUTH_CREDENTIALS = {
+    username: 'admin',
+    password: 'camionsbl2026'
+};
+
+function checkLogin() {
+    const isLoggedIn = sessionStorage.getItem('pmo_logged_in') === 'true';
+    const loginScreen = document.getElementById('loginScreen');
+    
+    // Set MARCUS avatar on login page
+    const loginAvatar = document.getElementById('loginMarcusAvatar');
+    if (loginAvatar) loginAvatar.src = MARCUS_AVATAR;
+    
+    if (isLoggedIn) {
+        loginScreen.style.display = 'none';
+    } else {
+        loginScreen.style.display = 'flex';
+    }
+}
+
+function doLogin() {
+    const user = document.getElementById('loginUser').value.trim().toLowerCase();
+    const pass = document.getElementById('loginPass').value;
+    const errorDiv = document.getElementById('loginError');
+    
+    if (user === AUTH_CREDENTIALS.username && pass === AUTH_CREDENTIALS.password) {
+        sessionStorage.setItem('pmo_logged_in', 'true');
+        document.getElementById('loginScreen').style.display = 'none';
+        errorDiv.style.display = 'none';
+    } else {
+        errorDiv.textContent = 'Identifiant ou mot de passe incorrect';
+        errorDiv.style.display = 'block';
+        document.getElementById('loginPass').value = '';
+    }
+}
+
+function doLogout() {
+    try {
+        sessionStorage.removeItem('pmo_logged_in');
+        const loginScreen = document.getElementById('loginScreen');
+        if (loginScreen) {
+            loginScreen.style.display = 'flex';
+            const loginAvatar = document.getElementById('loginMarcusAvatar');
+            if (loginAvatar) loginAvatar.src = MARCUS_AVATAR;
+        }
+        const loginUser = document.getElementById('loginUser');
+        const loginPass = document.getElementById('loginPass');
+        const loginError = document.getElementById('loginError');
+        if (loginUser) loginUser.value = '';
+        if (loginPass) loginPass.value = '';
+        if (loginError) loginError.style.display = 'none';
+    } catch(e) {
+        console.error('Logout error:', e);
+        sessionStorage.clear();
+        location.reload();
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════
 // BOOT
 // ═══════════════════════════════════════════════════════════════
+checkLogin();
 init();
+
+// Add floating MARCUS button
+document.body.insertAdjacentHTML('beforeend', `
+<div id="marcusFloating" style="position:fixed;bottom:24px;right:24px;z-index:9999">
+    <button onclick="openMarcus()" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#8b5cf6,#6366f1);border:3px solid white;cursor:pointer;box-shadow:0 4px 20px rgba(139,92,246,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s,box-shadow 0.2s;padding:0;overflow:hidden" onmouseover="this.style.transform='scale(1.1)';this.style.boxShadow='0 6px 25px rgba(139,92,246,0.5)'" onmouseout="this.style.transform='scale(1)';this.style.boxShadow='0 4px 20px rgba(139,92,246,0.4)'" title="MARCUS — Assistant IA">
+        <img src="${MARCUS_AVATAR}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
+    </button>
+    <div style="position:absolute;bottom:-6px;right:-6px;background:linear-gradient(135deg,#8b5cf6,#6366f1);color:white;font-size:0.55rem;font-weight:700;padding:3px 8px;border-radius:10px;box-shadow:0 2px 6px rgba(0,0,0,0.3);border:2px solid white">MARCUS</div>
+</div>
+`);
 </script>
 </body>
 </html>
